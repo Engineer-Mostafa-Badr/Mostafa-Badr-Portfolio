@@ -1,16 +1,62 @@
-# mostafa_badr_portfolio
+# Mostafa Badr Portfolio
 
-A new Flutter project.
+## نظرة عامة
 
-## Getting Started
+تطبيق Flutter واحد الصفحة يُعيد تقديم سيرة Mostafa Badr المهنية بشكل مرئي وعملي. يعتمد على تخطيط يتفاعل مع عرض الشاشة، كما يجمع بين الخلفية المتحركة والعناصر المتحركة لتعزيز إحساس الحديثة أثناء استعراض البيانات الشخصية والمشاريع والخبرات.
 
-This project is a starting point for a Flutter application.
+## المميزات الرئيسية
 
-A few resources to get you started if this is your first Flutter project:
+- **خلفية متحركة** مع طبقة ضبابية لتحسين التركيز على المحتوى الأمامي.
+- **بطاقة تعريف مصغّرة في المقدمة** تظهر التحية، المسمى الوظيفي، جملة التعريف، وسنة الخبرة مع شُعَل تتغير.
+- **تنقل في الأعلى** يربط بين الأقسام الأساسية (Home، Projects، Contact) مع تحريك ناعم عند الضغط.
+- **أزرار اتصال وتنزيل** تفتح مباشرة واتساب أو رابط ملف السيرة الذاتية.
+- **تصميم مرن حساس** (Responsive) يدعم الموبايل والتابلت والسطح المكتب مع ضبط الفراغات والحجم تلقائيًا.
+- **شهادات، كورسات، ومهارات** مصنفة في أقسام متتابعة مع تأثيرات حركة خفيفة عند الظهور.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## أقسام الشاشة
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- `TopBar`: شريط تنقل دائم مع روابط للأقسام الرئيسية.
+- `HeroSection`: البطل مع الاسم، التخصص، الملخص، وبطاقة الخبرة والتقنيات.
+- `AboutSection`: نبذة شخصية ونقاط القوة الأساسية (اقرأ الملف للتفاصيل).
+- `EducationSection`: سرد لمسار التعليم الرسمي.
+- `WorkExperienceSection`: خبرات العمل مع تواريخ وأدوار.
+- `CoursesSection`: الكورسات التكميلية التي أكملها.
+- `CertificationsSection`: عرض للشهادات مع صور مصغرة.
+- `ProjectsSection`: مشاريع حقيقية مع عرض للصور والتقنيات المستخدمة.
+- `SkillsSection`: عرض لشرائح المهارات الرئيسية (Android، iOS، Web، Desktop).
+- `ContactSection`: بطاقة دعوة للتواصل مع أزرار واتساب وروابط البريد و LinkedIn و GitHub.
+- `FooterSection`: قسم ختامي مع حقوق النشر والروابط الثانوية.
+
+## التقنيات والمكتبات
+
+- Flutter (المسار `lib/`)
+- `google_fonts` لاستيراد خطوط Inter.
+- `animated_text_kit` لإنشاء النص المتحرك في المقدمة.
+- `flutter_animate` لتسهيل الحركات عند ظهور العناصر.
+- بنية `StatefulWidget` + `ScrollController` لوظائف التمرير الناعم داخل `PortfolioHome`.
+- Assets منظمة (`assets/images/...`) تشمل لوغو، صور مشاريع، جوائز، وصورة شخصية.
+
+## خطوات التشغيل
+
+1. تثبيت الحزم:
+   ```bash
+   flutter pub get
+   ```
+2. تشغيل على المتصفح أو جهاز محمول:
+   ```bash
+   flutter run -d chrome
+   ```
+   أو استبدال `chrome` بـ `windows`, `macos`, `linux`, `android`, `ios` حسب الهدف.
+3. أو بناء نسخة إنتاجية:
+   ```bash
+   flutter build web
+   ```
+
+## ملاحظات إضافية
+
+- المسافات الأفقية تتغير عبر `deviceTypeFromWidth` لتوفير تجربة مريحة على كل حجم شاشة.
+- روابط الاتصال مخزنة في `utils/url_utils.dart` ويتم استدعاؤها من الأزرار والشارات.
+
+## رابط الموقع
+
+- [https://engineer-mostafa-badr-portfolio.netlify.app/](https://engineer-mostafa-badr-portfolio.netlify.app/)
