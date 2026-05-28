@@ -1,10 +1,12 @@
+import 'package:mostafa_badr_portfolio/utils/app_locale.dart';
+
 class CourseItem {
-  final String title;
-  final String description;
+  final L18n title;
+  final L18n description;
   final String image;
   final String certificateUrl;
 
-  CourseItem({
+  const CourseItem({
     required this.title,
     required this.description,
     required this.image,

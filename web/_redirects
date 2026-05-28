@@ -1,0 +1,4 @@
+# Netlify redirects file
+# Catch-all 404 for any unknown paths — keep root SPA behavior intact.
+
+/*  /404.html  404

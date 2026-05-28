@@ -1,0 +1,50 @@
+# Netlify headers — cache strategy for Flutter web build
+# Reference: https://docs.netlify.com/routing/headers/
+
+# HTML — never cache (so users always get the latest deploy)
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+/404.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Service worker — never cache
+/flutter_service_worker.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Manifest + bootstrap — short cache
+/manifest.json
+  Cache-Control: public, max-age=3600
+
+/flutter_bootstrap.js
+  Cache-Control: public, max-age=3600
+
+# Hashed assets — cache forever (filenames change per deploy)
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/canvaskit/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Static images — cache for a week
+/favicon.png
+  Cache-Control: public, max-age=604800
+
+/og-image.png
+  Cache-Control: public, max-age=604800
+
+# SEO files — daily refresh
+/robots.txt
+  Cache-Control: public, max-age=86400
+
+/sitemap.xml
+  Cache-Control: public, max-age=86400
+
+# Global security headers
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
