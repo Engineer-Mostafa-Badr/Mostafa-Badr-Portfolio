@@ -1,0 +1,47 @@
+{
+  "name": "Mostafa Badr — Flutter Developer · Odoo ERP Specialist",
+  "short_name": "Mostafa Badr",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#050A1A",
+  "theme_color": "#050A1A",
+  "description": "Mid-Level Flutter Developer with 2.5+ years shipping production-grade Android & iOS apps. Currently at Digital Harbor (Golden Odoo Partner). 6 live apps including Al Rajhi Hajj, Saqqar, Customer Visits, and HR.",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/Icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/Icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/Icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/Icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
