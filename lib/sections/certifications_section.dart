@@ -34,7 +34,8 @@ class CertificationsSection extends StatelessWidget {
         'Route Academy — دبلومة Flutter في مدينة نصر، القاهرة. مايو 2024 – سبتمبر 2024.',
       ),
       image: 'assets/images/certificates/1735110803287.jpg',
-      certificateUrl: 'https://www.routeacademy.com/your_certificate_link',
+      certificateUrl:
+          'https://drive.google.com/file/d/1J7MAiIBzGmyq46L5FRzsGgD0MIAsuBJH/view',
     );
 
     final card = AspectRatio(

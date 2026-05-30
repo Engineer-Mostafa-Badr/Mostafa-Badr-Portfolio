@@ -158,6 +158,8 @@ class _CourseShowcaseState extends State<CourseShowcase> {
   String? _platformLabel(String url) {
     if (url.contains('udemy.com')) return 'Udemy';
     if (url.contains('routeacademy')) return 'Route Academy';
+    // Route Academy hard-copy cert is hosted on Google Drive.
+    if (url.contains('drive.google.com')) return 'Route Academy';
     return null;
   }
 

@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mostafa_badr_portfolio/sections/portfolio_home.dart';
 import 'package:mostafa_badr_portfolio/utils/app_locale.dart';
 import 'package:mostafa_badr_portfolio/utils/app_theme.dart';
+import 'package:mostafa_badr_portfolio/widgets/konami_easter_egg.dart';
 
 void main() {
   runApp(const PortfolioApp());
@@ -46,7 +47,7 @@ class PortfolioApp extends StatelessWidget {
                     GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
                 cardColor: Colors.black.withValues(alpha: 0.35),
               ),
-              home: const PortfolioHome(),
+              home: const KonamiEasterEgg(child: PortfolioHome()),
             );
           },
         );

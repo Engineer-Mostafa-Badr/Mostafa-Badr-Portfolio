@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:mostafa_badr_portfolio/data/projects_data.dart';
 import 'package:mostafa_badr_portfolio/utils/app_locale.dart';
 import 'package:mostafa_badr_portfolio/utils/app_theme.dart';
+import 'package:mostafa_badr_portfolio/utils/contact_links.dart';
 import 'package:mostafa_badr_portfolio/utils/url_utils.dart';
 
 class CommandPaletteAction {
@@ -175,7 +176,7 @@ class _CommandPaletteSheetState extends State<_CommandPaletteSheet> {
         hint: 'wa.me',
         onRun: () {
           Navigator.of(context).pop();
-          openUrl('https://wa.me/201004652998');
+          openUrl(hireMeLink(arabic: widget.ar));
         },
       ),
       CommandPaletteAction(

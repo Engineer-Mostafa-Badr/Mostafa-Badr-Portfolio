@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mostafa_badr_portfolio/utils/app_locale.dart';
+import 'package:mostafa_badr_portfolio/utils/contact_links.dart';
 import 'package:mostafa_badr_portfolio/utils/device_type.dart';
 import 'package:mostafa_badr_portfolio/utils/url_utils.dart';
 import 'package:mostafa_badr_portfolio/widgets/glass_card.dart';
+import 'package:mostafa_badr_portfolio/widgets/inline_contact_form.dart';
 import 'package:mostafa_badr_portfolio/widgets/section_header.dart';
 
 class ContactSection extends StatelessWidget {
@@ -67,12 +69,47 @@ class ContactCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 18),
+          // Inline form — primary path for visitors who'd rather type than
+          // open WhatsApp.
+          const InlineContactForm(),
+          const SizedBox(height: 22),
+          // Divider with "or" label
+          Row(
+            children: [
+              Expanded(
+                child: Divider(
+                  color: Colors.white.withValues(alpha: 0.10),
+                  thickness: 1,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text(
+                  ar ? 'أو' : 'OR',
+                  style: TextStyle(
+                    color: Colors.grey[500],
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Divider(
+                  color: Colors.white.withValues(alpha: 0.10),
+                  thickness: 1,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
           Wrap(
             spacing: 10,
             runSpacing: 10,
             children: [
               ElevatedButton.icon(
-                onPressed: () => openUrl('https://wa.me/201004652998'),
+                onPressed: () =>
+                    openUrl(scheduleCallLink(arabic: isArabic(context))),
                 icon: const Icon(Icons.chat_bubble_outline_rounded, size: 16),
                 label: Text(Tr.k(context, 'contact.whatsapp')),
                 style: ElevatedButton.styleFrom(

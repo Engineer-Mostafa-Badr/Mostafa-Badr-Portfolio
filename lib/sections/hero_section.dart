@@ -2,8 +2,10 @@ import 'dart:math' as math;
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mostafa_badr_portfolio/utils/app_locale.dart';
+import 'package:mostafa_badr_portfolio/utils/contact_links.dart';
 import 'package:mostafa_badr_portfolio/utils/device_type.dart';
 import 'package:mostafa_badr_portfolio/utils/url_utils.dart';
+import 'package:mostafa_badr_portfolio/widgets/cv_preview_modal.dart';
 import 'package:mostafa_badr_portfolio/widgets/stat_counter.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
@@ -137,84 +139,7 @@ class _HeroTextBlock extends StatelessWidget {
     return Column(
       crossAxisAlignment: align,
       children: [
-        // Status pill
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(22),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.green.withValues(alpha: 0.20),
-                const Color(0xFF34D399).withValues(alpha: 0.10),
-              ],
-            ),
-            border: Border.all(
-              color: Colors.greenAccent.withValues(alpha: 0.55),
-              width: 1.2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.greenAccent.withValues(alpha: 0.25),
-                blurRadius: 14,
-                spreadRadius: 1,
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 18,
-                    height: 18,
-                    decoration: BoxDecoration(
-                      color: Colors.greenAccent.withValues(alpha: 0.30),
-                      shape: BoxShape.circle,
-                    ),
-                  )
-                      .animate(onPlay: (c) => c.repeat())
-                      .scaleXY(
-                        begin: 0.6,
-                        end: 1.4,
-                        duration: 1400.ms,
-                        curve: Curves.easeOut,
-                      )
-                      .fade(begin: 0.7, end: 0.0, duration: 1400.ms),
-                  Container(
-                    width: 9,
-                    height: 9,
-                    decoration: const BoxDecoration(
-                      color: Colors.greenAccent,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(color: Colors.greenAccent, blurRadius: 8),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(width: 10),
-              Text(
-                isArabic(context)
-                    ? 'متاح لفرص جديدة'
-                    : 'Available for opportunities',
-                style: const TextStyle(
-                  color: Colors.greenAccent,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.2,
-                ),
-              ),
-            ],
-          ),
-        )
-            .animate()
-            .fadeIn(duration: 600.ms)
-            .slideY(begin: -0.3, end: 0),
+        _AvailableForHireBanner(center: center),
         const SizedBox(height: 16),
         SizedBox(
           height: isMobile ? 36 : 48,
@@ -273,10 +198,10 @@ class _HeroTextBlock extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 620),
           child: Text(
             isArabic(context)
-                ? 'أكثر من سنتين و نصف خبرة في بناء تطبيقات Flutter cross-platform بمستوى إنتاجي — '
+                ? 'أكثر من سنتين خبرة في بناء تطبيقات Flutter cross-platform بمستوى إنتاجي — '
                     'متخصص دلوقتي في تكامل Odoo ERP، Clean Architecture، و تجارب ثنائية اللغة مع RTL كامل. '
                     'سلّمت 6 تطبيقات حية مع Sentry observability و معمارية قابلة للتوسع.'
-                : '2.5+ years building production-grade cross-platform Flutter apps — '
+                : '2+ years building production-grade cross-platform Flutter apps — '
                     'currently specialising in Odoo ERP integration, Clean Architecture, and bilingual experiences with full RTL. '
                     'Shipped 6 live apps with Sentry observability and scalable architecture.',
             textAlign: textAlign,
@@ -361,7 +286,6 @@ class _HeroTextBlock extends StatelessWidget {
           ),
           StatCounter(
             targetValue: 2,
-            suffix: '.5+',
             label: ar ? 'سنوات خبرة' : 'YEARS EXPERIENCE',
             icon: Icons.workspace_premium,
             accent: const Color(0xFFFFD700),
@@ -380,9 +304,9 @@ class _HeroTextBlock extends StatelessWidget {
       runSpacing: 10,
       children: [
         ElevatedButton.icon(
-          onPressed: () => openUrl('https://wa.me/201004652998'),
-          icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
-          label: Text(ar ? 'تواصل معي' : "Let's Talk"),
+          onPressed: () => openUrl(scheduleCallLink(arabic: ar)),
+          icon: const Icon(Icons.event_available_outlined, size: 18),
+          label: Text(ar ? 'احجز Call' : 'Schedule a Call'),
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFFFD700),
             foregroundColor: Colors.black,
@@ -397,16 +321,35 @@ class _HeroTextBlock extends StatelessWidget {
           ),
         ),
         OutlinedButton.icon(
-          onPressed: () => openUrl(
-            'https://drive.google.com/file/d/1CghFSaB04ZJ8WAsqT-A4pibLYGLodEYA/view?usp=sharing',
+          onPressed: () => CvPreviewModal.show(
+            context,
+            pdfUrl: 'cv/Mostafa-Badr-CV.pdf',
           ),
           icon: const Icon(Icons.download_rounded, size: 18),
           label: Text(ar ? 'تحميل السيرة الذاتية' : 'Download Resume'),
           style: OutlinedButton.styleFrom(
             foregroundColor: Colors.white,
             side: BorderSide(
-              // ignore: deprecated_member_use
-              color: Colors.white.withOpacity(0.4),
+              color: Colors.white.withValues(alpha: 0.4),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+            textStyle: const TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+        OutlinedButton.icon(
+          onPressed: () => openUrl(hireMeLink(arabic: ar)),
+          icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
+          label: Text(ar ? 'تواصل معي' : "Let's Talk"),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFF40C4FF),
+            side: BorderSide(
+              color: const Color(0xFF40C4FF).withValues(alpha: 0.6),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
             textStyle: const TextStyle(
@@ -652,5 +595,132 @@ class _OrbitingChip extends StatelessWidget {
       alignment: Alignment.center,
       child: FaIcon(spec.icon, size: 15, color: spec.color),
     );
+  }
+}
+
+/// Prominent "Available for Hire" banner — replaces the previous status pill.
+/// Click-through opens WhatsApp pre-filled with a scheduling request so the
+/// signal isn't just decorative — it converts.
+class _AvailableForHireBanner extends StatelessWidget {
+  final bool center;
+  const _AvailableForHireBanner({required this.center});
+
+  @override
+  Widget build(BuildContext context) {
+    final ar = isArabic(context);
+
+    final headline = ar ? 'متاح لفرص جديدة' : "I'm open to work";
+    final subline = ar
+        ? 'Mid-Level Flutter · عن بُعد من مصر · متاح الآن'
+        : 'Mid-Level Flutter · Remote from Egypt · Available now';
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => openUrl(scheduleCallLink(arabic: ar)),
+        borderRadius: BorderRadius.circular(26),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(26),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                const Color(0xFF34D399).withValues(alpha: 0.22),
+                const Color(0xFF10B981).withValues(alpha: 0.10),
+              ],
+            ),
+            border: Border.all(
+              color: const Color(0xFF34D399).withValues(alpha: 0.55),
+              width: 1.2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF34D399).withValues(alpha: 0.30),
+                blurRadius: 16,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 22,
+                    height: 22,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF34D399).withValues(alpha: 0.30),
+                      shape: BoxShape.circle,
+                    ),
+                  )
+                      .animate(onPlay: (c) => c.repeat())
+                      .scaleXY(
+                        begin: 0.6,
+                        end: 1.5,
+                        duration: 1500.ms,
+                        curve: Curves.easeOut,
+                      )
+                      .fade(begin: 0.7, end: 0.0, duration: 1500.ms),
+                  Container(
+                    width: 11,
+                    height: 11,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF34D399),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0xFF34D399),
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    headline,
+                    style: const TextStyle(
+                      color: Color(0xFF34D399),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subline,
+                    style: TextStyle(
+                      color: Colors.grey[300],
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.1,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 10),
+              const Icon(
+                Icons.arrow_forward_rounded,
+                size: 16,
+                color: Color(0xFF34D399),
+              ),
+            ],
+          ),
+        ),
+      ),
+    )
+        .animate()
+        .fadeIn(duration: 600.ms)
+        .slideY(begin: -0.3, end: 0);
   }
 }

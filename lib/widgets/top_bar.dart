@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:mostafa_badr_portfolio/utils/app_locale.dart';
 import 'package:mostafa_badr_portfolio/utils/app_theme.dart';
+import 'package:mostafa_badr_portfolio/utils/contact_links.dart';
 import 'package:mostafa_badr_portfolio/utils/url_utils.dart';
 
 class SectionTarget {
@@ -147,7 +148,8 @@ class _TopBarState extends State<TopBar> {
                 const _ThemeToggleButton(),
                 const SizedBox(width: 10),
                 ElevatedButton.icon(
-                  onPressed: () => openUrl('https://wa.me/201004652998'),
+                  onPressed: () =>
+                      openUrl(hireMeLink(arabic: isArabic(context))),
                   icon: const Icon(Icons.chat_bubble_outline_rounded, size: 16),
                   label: Text(Tr.k(context, 'nav.hireMe')),
                   style: ElevatedButton.styleFrom(
@@ -381,7 +383,7 @@ class _MobileNavSheet extends StatelessWidget {
           ElevatedButton.icon(
             onPressed: () {
               Navigator.of(context).pop();
-              openUrl('https://wa.me/201004652998');
+              openUrl(hireMeLink(arabic: isArabic(context)));
             },
             icon: const Icon(Icons.chat_bubble_outline_rounded, size: 16),
             label: Text(Tr.k(context, 'nav.hireMe')),

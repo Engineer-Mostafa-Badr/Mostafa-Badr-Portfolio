@@ -12,17 +12,17 @@
 
   <!-- Primary SEO -->
   <title>Mostafa Badr — Mid-Level Flutter Developer · Odoo ERP Specialist</title>
-  <meta name="description" content="Mid-Level Flutter Developer with 2.5+ years shipping production-grade Android & iOS apps. Currently at Digital Harbor (Golden Odoo Partner) — specialising in Odoo 18/19 ERP integration, Clean Architecture, Bloc/Cubit, and bilingual RTL experiences. 6 live apps including Al Rajhi Hajj, Saqqar, Customer Visits, and HR.">
+  <meta name="description" content="Mid-Level Flutter Developer with 2+ years shipping production-grade Android & iOS apps. Currently at Digital Harbor (Golden Odoo Partner) — specialising in Odoo 18/19 ERP integration, Clean Architecture, Bloc/Cubit, and bilingual RTL experiences. 6 live apps including Al Rajhi Hajj, Saqqar, Customer Visits, and HR.">
   <meta name="keywords" content="Mostafa Badr, Flutter Developer, Dart, Odoo, ERP, Mobile App Developer, Clean Architecture, Bloc, Cubit, RTL, Arabic, Egypt, Riyadh, Saudi Arabia, Digital Harbor, Al Rajhi Hajj, Saqqar">
   <meta name="author" content="Mostafa Badr">
   <meta name="theme-color" content="#050A1A">
-  <link rel="canonical" href="https://mostafa-badr.netlify.app/">
+  <link rel="canonical" href="https://engineer-mostafa-badr-portfolio.netlify.app/">
 
   <!-- Open Graph (Facebook, LinkedIn, WhatsApp) -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://mostafa-badr.netlify.app/">
+  <meta property="og:url" content="https://engineer-mostafa-badr-portfolio.netlify.app/">
   <meta property="og:title" content="Mostafa Badr — Flutter Developer · Odoo ERP Specialist">
-  <meta property="og:description" content="2.5+ years shipping production-grade Flutter apps. Currently at Digital Harbor (Golden Odoo Partner) — Odoo 18/19 integration, Clean Architecture, bilingual RTL.">
+  <meta property="og:description" content="2+ years shipping production-grade Flutter apps. Currently at Digital Harbor (Golden Odoo Partner) — Odoo 18/19 integration, Clean Architecture, bilingual RTL.">
   <meta property="og:image" content="og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -34,7 +34,7 @@
   <!-- Twitter / X Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Mostafa Badr — Flutter Developer · Odoo ERP Specialist">
-  <meta name="twitter:description" content="2.5+ years shipping production Flutter apps. Currently at Digital Harbor — Odoo 18/19, Clean Architecture, bilingual RTL.">
+  <meta name="twitter:description" content="2+ years shipping production Flutter apps. Currently at Digital Harbor — Odoo 18/19, Clean Architecture, bilingual RTL.">
   <meta name="twitter:image" content="og-image.png">
   <meta name="twitter:image:alt" content="Mostafa Badr — Flutter Developer">
 
@@ -50,7 +50,7 @@
   <!-- Plausible Analytics (privacy-friendly, cookieless).
        Configure the domain in plausible.io dashboard then uncomment the script.
        Docs: https://plausible.io/docs -->
-  <!-- <script defer data-domain="mostafa-badr.netlify.app" src="https://plausible.io/js/script.js"></script> -->
+  <!-- <script defer data-domain="engineer-mostafa-badr-portfolio.netlify.app" src="https://plausible.io/js/script.js"></script> -->
 
   <!-- Schema.org structured data (Person) -->
   <script type="application/ld+json">
@@ -61,8 +61,8 @@
     "alternateName": "مصطفى بدر",
     "jobTitle": "Mid-Level Flutter Developer",
     "description": "Flutter developer specialising in Odoo ERP integration, Clean Architecture, and bilingual RTL mobile experiences.",
-    "url": "https://mostafa-badr.netlify.app/",
-    "image": "https://mostafa-badr.netlify.app/favicon.png",
+    "url": "https://engineer-mostafa-badr-portfolio.netlify.app/",
+    "image": "https://engineer-mostafa-badr-portfolio.netlify.app/favicon.png",
     "email": "mostafamostafabadrbadr@gmail.com",
     "telephone": "+201004652998",
     "knowsLanguage": ["Arabic", "English"],
@@ -112,8 +112,124 @@
       'color:#888; font-size:11px;'
     );
   </script>
+
+  <!-- Branded splash — visible while Flutter is bootstrapping (~3s on cold load).
+       Fades out as soon as the Flutter app reports it's ready. -->
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #050A1A;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    #mb-splash {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255, 215, 0, 0.10) 0%, transparent 50%),
+        radial-gradient(circle at 70% 80%, rgba(64, 196, 255, 0.10) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(156, 123, 255, 0.08) 0%, transparent 60%),
+        linear-gradient(135deg, #050A1A 0%, #0A1230 50%, #0E0B26 100%);
+      transition: opacity 600ms ease-out;
+    }
+    #mb-splash.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .mb-logo {
+      width: 88px;
+      height: 88px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #FFD700 0%, #40C4FF 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #050A1A;
+      font-size: 38px;
+      font-weight: 900;
+      letter-spacing: -2px;
+      box-shadow:
+        0 12px 40px rgba(64, 196, 255, 0.35),
+        0 0 80px rgba(255, 215, 0, 0.18);
+      animation: mb-pulse 2s ease-in-out infinite;
+    }
+    @keyframes mb-pulse {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.06); }
+    }
+    .mb-name {
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      margin-top: 22px;
+    }
+    .mb-tagline {
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.8px;
+      margin-top: 6px;
+      text-transform: uppercase;
+    }
+    .mb-progress {
+      width: 160px;
+      height: 3px;
+      margin-top: 26px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+    .mb-progress::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      width: 40%;
+      background: linear-gradient(90deg, transparent, #40C4FF, transparent);
+      border-radius: 2px;
+      animation: mb-slide 1.4s ease-in-out infinite;
+    }
+    @keyframes mb-slide {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(350%); }
+    }
+  </style>
 </head>
 <body>
+  <!-- Branded splash screen — removed by Flutter after first frame -->
+  <div id="mb-splash">
+    <div class="mb-logo">MB</div>
+    <div class="mb-name">Mostafa Badr</div>
+    <div class="mb-tagline">Flutter · Odoo</div>
+    <div class="mb-progress"></div>
+  </div>
+
   <script src="flutter_bootstrap.js" async></script>
+
+  <script>
+    // Hide the splash as soon as Flutter takes over the page.
+    // Two safety nets:
+    //   1. flutter-first-frame event (preferred — fires after first paint)
+    //   2. 8s timeout fallback in case the event never fires
+    window.addEventListener('flutter-first-frame', function () {
+      var splash = document.getElementById('mb-splash');
+      if (!splash) return;
+      splash.classList.add('fade-out');
+      setTimeout(function () { splash.remove(); }, 700);
+    });
+    setTimeout(function () {
+      var splash = document.getElementById('mb-splash');
+      if (splash && !splash.classList.contains('fade-out')) {
+        splash.classList.add('fade-out');
+        setTimeout(function () { splash.remove(); }, 700);
+      }
+    }, 8000);
+  </script>
 </body>
 </html>

@@ -769,6 +769,7 @@ class _ProjectLightboxDialogState extends State<ProjectLightboxDialog> {
     final project = widget.project;
     final width = MediaQuery.of(context).size.width;
     final isMobile = deviceTypeFromWidth(width) == DeviceType.mobile;
+    final ar = isArabic(context);
     final statusText = project.statusLabel.t(context);
 
     return SingleChildScrollView(
@@ -777,6 +778,7 @@ class _ProjectLightboxDialogState extends State<ProjectLightboxDialog> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Status pill (live / in review / completed)
             if (statusText.isNotEmpty)
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -814,6 +816,7 @@ class _ProjectLightboxDialogState extends State<ProjectLightboxDialog> {
                 ),
               ),
             const SizedBox(height: 14),
+            // Title
             ShaderMask(
               shaderCallback: (rect) => const LinearGradient(
                 colors: [Colors.white, Color(0xFFB3E5FC)],
@@ -828,91 +831,103 @@ class _ProjectLightboxDialogState extends State<ProjectLightboxDialog> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            Text(
-              project.shortDescription.t(context),
-              style: TextStyle(
-                color: Colors.grey[300],
-                fontSize: isMobile ? 13 : 15,
-                height: 1.6,
-              ),
-            ),
-            if (project.impactHighlights.isNotEmpty) ...[
-              const SizedBox(height: 20),
-              Text(
-                Tr.k(context, 'projects.highlights'),
+            const SizedBox(height: 22),
+            // ──────── CHALLENGE ────────
+            _CaseStudyBlock(
+              icon: Icons.lightbulb_outline_rounded,
+              accent: const Color(0xFFFFD700),
+              label: ar ? 'التحدّي' : 'The Challenge',
+              child: Text(
+                project.shortDescription.t(context),
                 style: TextStyle(
-                  color: Colors.grey[500],
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 2,
+                  color: Colors.grey[300],
+                  fontSize: isMobile ? 13 : 14.5,
+                  height: 1.65,
                 ),
               ),
-              const SizedBox(height: 10),
-              ...project.impactHighlights.map(
-                (impact) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        size: 11,
-                        color: Color(0xFFFFD700),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          impact.t(context),
-                          style: TextStyle(
-                            color: Colors.grey[200],
-                            fontSize: isMobile ? 12.5 : 14,
-                            height: 1.5,
+            ),
+            // ──────── SOLUTION / KEY IMPACT ────────
+            if (project.impactHighlights.isNotEmpty) ...[
+              const SizedBox(height: 18),
+              _CaseStudyBlock(
+                icon: Icons.check_circle_outline_rounded,
+                accent: const Color(0xFF34D399),
+                label: ar ? 'الحل و الأثر' : 'Solution & Impact',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: project.impactHighlights.map(
+                    (impact) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 5),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(top: 6),
+                            width: 5,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: const Color(0xFF34D399),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF34D399)
+                                      .withValues(alpha: 0.5),
+                                  blurRadius: 5,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 11),
+                          Expanded(
+                            child: Text(
+                              impact.t(context),
+                              style: TextStyle(
+                                color: Colors.grey[200],
+                                fontSize: isMobile ? 12.5 : 14,
+                                height: 1.55,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ).toList(),
                 ),
               ),
             ],
-            const SizedBox(height: 20),
-            Text(
-              Tr.k(context, 'projects.techStack'),
-              style: TextStyle(
-                color: Colors.grey[500],
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 2,
+            // ──────── TECH STACK ────────
+            const SizedBox(height: 18),
+            _CaseStudyBlock(
+              icon: Icons.terminal_rounded,
+              accent: const Color(0xFF40C4FF),
+              label: ar ? 'التقنيات' : 'Tech Stack',
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: project.techs.map((tech) {
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF40C4FF).withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: const Color(0xFF40C4FF).withValues(alpha: 0.35),
+                      ),
+                    ),
+                    child: Text(
+                      tech,
+                      style: const TextStyle(
+                        color: Color(0xFF40C4FF),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
-            ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: project.techs.map((tech) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF40C4FF).withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: const Color(0xFF40C4FF).withValues(alpha: 0.35),
-                    ),
-                  ),
-                  child: Text(
-                    tech,
-                    style: const TextStyle(
-                      color: Color(0xFF40C4FF),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                );
-              }).toList(),
             ),
             const SizedBox(height: 24),
             Builder(
@@ -972,6 +987,63 @@ class _ProjectLightboxDialogState extends State<ProjectLightboxDialog> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// One section inside the project lightbox — Challenge / Solution / Stack.
+/// Visually consistent: small icon + uppercase label header, then content.
+class _CaseStudyBlock extends StatelessWidget {
+  final IconData icon;
+  final Color accent;
+  final String label;
+  final Widget child;
+
+  const _CaseStudyBlock({
+    required this.icon,
+    required this.accent,
+    required this.label,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: accent.withValues(alpha: 0.18)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(7),
+                ),
+                child: Icon(icon, size: 14, color: accent),
+              ),
+              const SizedBox(width: 9),
+              Text(
+                label.toUpperCase(),
+                style: TextStyle(
+                  color: accent,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.6,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 11),
+          child,
+        ],
       ),
     );
   }

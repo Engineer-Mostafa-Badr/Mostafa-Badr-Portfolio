@@ -6,6 +6,7 @@ import 'package:mostafa_badr_portfolio/sections/certifications_section.dart';
 import 'package:mostafa_badr_portfolio/sections/education_section.dart';
 import 'package:mostafa_badr_portfolio/sections/footer_section.dart';
 import 'package:mostafa_badr_portfolio/sections/hero_section.dart';
+import 'package:mostafa_badr_portfolio/sections/pre_footer_cta.dart';
 import 'package:mostafa_badr_portfolio/sections/process_section.dart';
 import 'package:mostafa_badr_portfolio/sections/projects_section.dart';
 import 'package:mostafa_badr_portfolio/sections/skills_section.dart';
@@ -18,6 +19,7 @@ import 'package:mostafa_badr_portfolio/utils/scroll_notifier.dart';
 import 'package:mostafa_badr_portfolio/widgets/animated_background.dart';
 import 'package:mostafa_badr_portfolio/widgets/animated_section.dart';
 import 'package:mostafa_badr_portfolio/widgets/command_palette.dart';
+import 'package:mostafa_badr_portfolio/widgets/section_nav_dots.dart';
 import 'package:mostafa_badr_portfolio/widgets/top_bar.dart';
 
 class PortfolioHome extends StatefulWidget {
@@ -188,6 +190,8 @@ class _PortfolioHomeState extends State<PortfolioHome> {
                         key: _contactSectionKey,
                         child: const ContactSection(),
                       ),
+                      const SizedBox(height: 56),
+                      const AnimatedSection(child: PreFooterCta()),
                       const SizedBox(height: 40),
                       const AnimatedSection(child: FooterSection()),
                       const SizedBox(height: 28),
@@ -223,6 +227,19 @@ class _PortfolioHomeState extends State<PortfolioHome> {
             left: 0,
             right: 0,
             child: _StickyStatsBanner(visible: _showStickyStats),
+          ),
+          // Right-edge section indicator dots (desktop only)
+          Positioned(
+            top: 0,
+            bottom: 0,
+            right: 0,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: SectionNavDots(
+                targets: _sectionTargets,
+                scrollController: _scrollController,
+              ),
+            ),
           ),
           // Scroll-to-top floating button
           if (_showScrollToTop)
@@ -301,7 +318,7 @@ class _StickyStatsBanner extends StatelessWidget {
             : const [
                 ('6', 'تطبيقات حية'),
                 ('4', 'Odoo'),
-                ('2.5+', 'سنوات'),
+                ('2+', 'سنوات'),
                 ('●', 'متاح'),
               ])
         : (isNarrow
@@ -313,7 +330,7 @@ class _StickyStatsBanner extends StatelessWidget {
             : const [
                 ('6', 'Live'),
                 ('4', 'Odoo'),
-                ('2.5+', 'Years'),
+                ('2+', 'Years'),
                 ('●', 'Available'),
               ]);
 

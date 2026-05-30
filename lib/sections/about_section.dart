@@ -29,11 +29,11 @@ class AboutSection extends StatelessWidget {
             children: [
               Text(
                 ar
-                    ? 'أنا مصطفى بدر — مطور Flutter متوسط الخبرة، عندي أكثر من سنتين و نصف خبرة عملية في شحن '
+                    ? 'أنا مصطفى بدر — مطور Flutter متوسط الخبرة، عندي أكثر من سنتين خبرة عملية في شحن '
                         'تطبيقات أندرويد و iOS بمستوى إنتاجي. حالياً في فريق Odoo Apps في Digital Harbor (Golden Odoo Partner) '
                         'بشتغل على تطبيقات موبايل enterprise متكاملة مع Odoo 18/19 ERP. قبل كده شحنت تطبيقات لـ '
                         'New Touch و Green Line في مجالات العقارات و التجارة الإلكترونية و ride-hailing.'
-                    : "I'm Mostafa Badr — a Mid-Level Flutter Developer with 2.5+ years of hands-on experience "
+                    : "I'm Mostafa Badr — a Mid-Level Flutter Developer with 2+ years of hands-on experience "
                         "shipping production-grade Android and iOS apps. Currently in the Odoo Apps team at Digital Harbor "
                         "(Golden Odoo Partner), building enterprise mobile companions integrated with Odoo 18/19 ERP. "
                         "Previously shipped apps for New Touch and Green Line across real estate, e-commerce, and ride-hailing.",
