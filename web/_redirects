@@ -1,4 +1,6 @@
-# Netlify redirects file
-# Catch-all 404 for any unknown paths — keep root SPA behavior intact.
-
-/*  /404.html  404
+# Redirect rules.
+#
+# No catch-all 404 rule here on purpose: Cloudflare rejects a 404 status code in
+# this file, and neither host needs the rule. Netlify serves 404.html for unknown
+# paths automatically, and Cloudflare does the same via "not_found_handling" in
+# wrangler.jsonc.
