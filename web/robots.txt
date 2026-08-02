@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://engineer-mostafa-badr-portfolio.netlify.app/sitemap.xml
+Sitemap: https://mostafabadr.com/sitemap.xml

@@ -98,9 +98,9 @@ class FooterSection extends StatelessWidget {
             ),
             _FooterChip(
               icon: FontAwesomeIcons.cloud,
-              iconColor: const Color(0xFF00C7B7),
-              label: ar ? 'مستضاف على Netlify' : 'Hosted on Netlify',
-              url: 'https://netlify.com',
+              iconColor: const Color(0xFFF6821F),
+              label: ar ? 'مستضاف على Cloudflare' : 'Hosted on Cloudflare',
+              url: 'https://cloudflare.com',
             ),
             _FooterChip(
               icon: FontAwesomeIcons.github,
@@ -244,7 +244,7 @@ class _LighthouseBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const targetUrl = 'https://pagespeed.web.dev/analysis?url='
-        'https%3A%2F%2Fengineer-mostafa-badr-portfolio.netlify.app%2F';
+        'https%3A%2F%2Fmostafabadr.com%2F';
     return Tooltip(
       message: isArabic(context)
           ? 'افتح تقرير Lighthouse على PageSpeed Insights'
