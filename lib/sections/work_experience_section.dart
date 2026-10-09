@@ -52,6 +52,11 @@ class _ExperienceEntry {
   final Color accent;
   final bool isCurrent;
 
+  /// Start of an ongoing role. When set, the duration pill is computed from the
+  /// current date so it never goes stale; [duration] is only the fallback.
+  final int? startYear;
+  final int? startMonth;
+
   const _ExperienceEntry({
     required this.position,
     required this.company,
@@ -63,7 +68,47 @@ class _ExperienceEntry {
     this.technologies = const [],
     this.accent = const Color(0xFF40C4FF),
     this.isCurrent = false,
+    this.startYear,
+    this.startMonth,
   });
+
+  L18n? get tenure {
+    final year = startYear;
+    final month = startMonth;
+    if (year == null || month == null) return duration;
+    final now = DateTime.now();
+    return _tenureLabel((now.year - year) * 12 + (now.month - month));
+  }
+}
+
+/// "6 mos" / "1 yr 2 mos" in English, with Arabic dual/plural agreement.
+L18n _tenureLabel(int totalMonths) {
+  final months = totalMonths < 1 ? 1 : totalMonths;
+  final years = months ~/ 12;
+  final rem = months % 12;
+
+  String arMonths(int n) {
+    if (n == 1) return 'شهر';
+    if (n == 2) return 'شهرين';
+    return n <= 10 ? '$n شهور' : '$n شهر';
+  }
+
+  String arYears(int n) {
+    if (n == 1) return 'سنة';
+    if (n == 2) return 'سنتين';
+    return n <= 10 ? '$n سنين' : '$n سنة';
+  }
+
+  if (years == 0) {
+    return L18n(months == 1 ? '1 mo' : '$months mos', arMonths(months));
+  }
+  if (rem == 0) {
+    return L18n(years == 1 ? '1 yr' : '$years yrs', arYears(years));
+  }
+  return L18n(
+    '${years == 1 ? '1 yr' : '$years yrs'} ${rem == 1 ? '1 mo' : '$rem mos'}',
+    '${arYears(years)} و ${arMonths(rem)}',
+  );
 }
 
 const _experienceEntries = <_ExperienceEntry>[
@@ -78,7 +123,9 @@ const _experienceEntries = <_ExperienceEntry>[
       'Apr 2026 – Present · Remote',
       'أبريل 2026 – حتى الآن · عن بُعد',
     ),
-    duration: L18n('2 mos', 'شهرين'),
+    duration: L18n('6 mos', '6 شهور'),
+    startYear: 2026,
+    startMonth: 4,
     accent: Color(0xFF22D3EE),
     isCurrent: true,
     description: L18n(
@@ -233,7 +280,7 @@ class _TimelineEntry extends StatelessWidget {
                 company: entry.company,
                 location: entry.location,
                 date: entry.date,
-                duration: entry.duration,
+                duration: entry.tenure,
                 description: entry.description,
                 highlights: entry.highlights,
                 technologies: entry.technologies,

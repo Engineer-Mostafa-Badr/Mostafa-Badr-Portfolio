@@ -57,6 +57,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Mostafa Badr">
   <link rel="apple-touch-icon" href="favicon.png">
+  <link rel="icon" type="image/svg+xml" href="logo.svg">
   <link rel="icon" type="image/png" href="favicon.png">
 
   <link rel="manifest" href="manifest.json">
@@ -156,25 +157,29 @@
       pointer-events: none;
     }
     .mb-logo {
-      width: 88px;
-      height: 88px;
-      border-radius: 22px;
-      background: linear-gradient(135deg, #FFD700 0%, #40C4FF 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #050A1A;
-      font-size: 38px;
-      font-weight: 900;
-      letter-spacing: -2px;
-      box-shadow:
-        0 12px 40px rgba(64, 196, 255, 0.35),
-        0 0 80px rgba(255, 215, 0, 0.18);
-      animation: mb-pulse 2s ease-in-out infinite;
+      width: 104px;
+      height: 104px;
+      filter:
+        drop-shadow(0 12px 32px rgba(64, 196, 255, 0.35))
+        drop-shadow(0 0 48px rgba(255, 215, 0, 0.16));
+      animation: mb-pulse 2.4s ease-in-out infinite;
     }
+    .mb-logo svg { width: 100%; height: 100%; display: block; }
+    /* The monogram draws itself on load, then the badge gently breathes. */
+    .mb-stroke {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: mb-draw 1.1s cubic-bezier(.65, 0, .35, 1) 0.15s forwards;
+    }
+    .mb-stroke.b { animation-delay: 0.55s; }
+    @keyframes mb-draw { to { stroke-dashoffset: 0; } }
     @keyframes mb-pulse {
       0%, 100% { transform: scale(1); }
-      50%      { transform: scale(1.06); }
+      50%      { transform: scale(1.04); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .mb-logo { animation: none; }
+      .mb-stroke { animation: none; stroke-dashoffset: 0; }
     }
     .mb-name {
       color: #ffffff;
@@ -218,7 +223,21 @@
 <body>
   <!-- Branded splash screen — removed by Flutter after first frame -->
   <div id="mb-splash">
-    <div class="mb-logo">MB</div>
+    <div class="mb-logo" aria-hidden="true">
+      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="mb-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFD700"/><stop offset="1" stop-color="#40C4FF"/></linearGradient>
+          <linearGradient id="mb-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#101A3E"/><stop offset="1" stop-color="#050A1A"/></linearGradient>
+          <linearGradient id="mb-m" gradientUnits="userSpaceOnUse" x1="96" y1="130" x2="396" y2="390"><stop offset="0" stop-color="#FFD700"/><stop offset="1" stop-color="#40C4FF"/></linearGradient>
+        </defs>
+        <rect width="512" height="512" rx="116" fill="url(#mb-bg)"/>
+        <rect x="5" y="5" width="502" height="502" rx="111" fill="none" stroke="url(#mb-g)" stroke-opacity=".55" stroke-width="5"/>
+        <g transform="translate(17 -4)" fill="none" stroke="url(#mb-m)" stroke-width="44" stroke-linecap="round" stroke-linejoin="round">
+          <path class="mb-stroke" pathLength="1" d="M104 372V148L174 270L244 148V372"/>
+          <path class="mb-stroke b" pathLength="1" d="M244 148H304a54 54 0 0 1 0 108H244M244 256H316a58 58 0 0 1 0 116H244"/>
+        </g>
+      </svg>
+    </div>
     <div class="mb-name">Mostafa Badr</div>
     <div class="mb-tagline">Flutter · Odoo</div>
     <div class="mb-progress"></div>
