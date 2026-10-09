@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mostafa_badr_portfolio/core/constants/app_colors.dart';
 
 class AppThemeController {
   static final ValueNotifier<ThemeMode> mode = ValueNotifier(ThemeMode.dark);
@@ -12,6 +13,10 @@ class AppThemeController {
 bool isLightMode(BuildContext context) =>
     Theme.of(context).brightness == Brightness.light;
 
+/// Theme-dependent surface, border, and text colours.
+///
+/// Raw colour values live in [AppColors]; this class decides which of them
+/// applies for the active brightness. Widgets ask the palette, never the hex.
 class AppPalette {
   final bool isLight;
   const AppPalette(this.isLight);
@@ -19,10 +24,10 @@ class AppPalette {
   factory AppPalette.of(BuildContext context) =>
       AppPalette(isLightMode(context));
 
-  // Surfaces — in light mode we keep cards dark-translucent so existing
-  // white/grey text inside sections remains readable without a full rewrite.
+  // Surfaces — in light mode cards stay dark-translucent so the white/grey
+  // text inside sections remains readable without a full colour rewrite.
   Color get cardSurface => isLight
-      ? const Color(0xFF0F172A).withValues(alpha: 0.82)
+      ? AppColors.slate900.withValues(alpha: 0.82)
       : Colors.black.withValues(alpha: 0.30);
   Color get cardBorder => isLight
       ? Colors.black.withValues(alpha: 0.18)
@@ -31,7 +36,7 @@ class AppPalette {
       ? Colors.black.withValues(alpha: 0.28)
       : Colors.white.withValues(alpha: 0.18);
 
-  // Glass gradients overlay on top of cardSurface
+  // Glass gradients overlay on top of cardSurface.
   List<Color> get cardGradient => isLight
       ? [
           Colors.white.withValues(alpha: 0.08),
@@ -42,19 +47,20 @@ class AppPalette {
           Colors.white.withValues(alpha: 0.02),
         ];
 
-  // Shadows — heavier in light mode for stronger contrast against the bg
+  // Shadows — heavier in light mode for stronger contrast against the bg.
   Color get shadow => isLight
       ? Colors.black.withValues(alpha: 0.22)
       : Colors.black.withValues(alpha: 0.35);
 
   // Text
-  Color get textPrimary => isLight ? const Color(0xFF0F172A) : Colors.white;
+  Color get textPrimary =>
+      isLight ? AppColors.textOnLightPrimary : Colors.white;
   Color get textSecondary =>
-      isLight ? const Color(0xFF475569) : Colors.grey.shade300;
+      isLight ? AppColors.textOnLightSecondary : Colors.grey.shade300;
   Color get textMuted =>
-      isLight ? const Color(0xFF64748B) : Colors.grey.shade400;
+      isLight ? AppColors.textOnLightMuted : Colors.grey.shade400;
   Color get textFaint =>
-      isLight ? const Color(0xFF94A3B8) : Colors.grey.shade500;
+      isLight ? AppColors.textOnLightFaint : Colors.grey.shade500;
 
   // Chips / inline pills
   Color get pillBackground => isLight
@@ -64,17 +70,23 @@ class AppPalette {
       ? Colors.black.withValues(alpha: 0.10)
       : Colors.white.withValues(alpha: 0.10);
 
-  // Brand accents — canonical palette, identical in both themes.
-  // Use these from app-chrome widgets (top bar, badges, hero, section headers).
-  // Per-project brand colors (inside project_cover, projects_data, skill icons)
-  // intentionally use their own hex codes — they are the project's identity,
-  // not the portfolio's chrome.
-  static const Color accentCyan = Color(0xFF40C4FF);
-  static const Color accentGold = Color(0xFFFFD700);
-  static const Color accentPurple = Color(0xFF9C7BFF);
-  static const Color accentMint = Color(0xFF69F0AE);
-  static const Color accentTeal = Color(0xFF22D3EE);
-  static const Color accentAmber = Color(0xFFFBBF24);
-  static const Color accentCoral = Color(0xFFFF8A65);
-  static const Color statusOnline = Color(0xFF34D399);
+  /// Section-title gradient, dark on light backgrounds and light on dark.
+  List<Color> get titleGradient => isLight
+      ? const [AppColors.textOnLightPrimary, AppColors.titleGradientLightEnd]
+      : AppColors.titleSheen;
+
+  /// Page backdrop gradient.
+  List<Color> get backdrop =>
+      isLight ? AppColors.backdropLight : AppColors.backdropDark;
+
+  // Brand accents are theme-independent; re-exported here so widgets need only
+  // one import for colour decisions.
+  static const Color accentCyan = AppColors.cyan;
+  static const Color accentGold = AppColors.gold;
+  static const Color accentPurple = AppColors.purple;
+  static const Color accentMint = AppColors.mint;
+  static const Color accentTeal = AppColors.teal;
+  static const Color accentAmber = AppColors.amber;
+  static const Color accentCoral = AppColors.coral;
+  static const Color statusOnline = AppColors.success;
 }

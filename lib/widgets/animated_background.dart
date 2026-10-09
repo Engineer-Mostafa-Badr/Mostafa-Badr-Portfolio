@@ -1,8 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:mostafa_badr_portfolio/core/constants/app_colors.dart';
+import 'package:mostafa_badr_portfolio/core/utils/responsive.dart';
 import 'package:mostafa_badr_portfolio/utils/app_theme.dart';
-import 'package:mostafa_badr_portfolio/utils/device_type.dart';
 import 'package:mostafa_badr_portfolio/utils/scroll_notifier.dart';
 
+/// Drifting gradient orbs behind the whole page.
+///
+/// Rewritten as a single [CustomPainter] driven by a merged [Listenable].
+/// The previous version rebuilt a `Stack` of four `Container`s inside an
+/// `AnimatedBuilder` nested in a `ValueListenableBuilder` — that is a full
+/// widget-tree rebuild plus layout on every animation frame *and* every scroll
+/// pixel, for something that is purely decorative. Painting it directly skips
+/// build and layout entirely: same visuals, a fraction of the cost, and the
+/// [RepaintBoundary] keeps the repaint off the rest of the page.
 class AnimatedBackground extends StatefulWidget {
   const AnimatedBackground({super.key});
 
@@ -12,170 +23,169 @@ class AnimatedBackground extends StatefulWidget {
 
 class _AnimatedBackgroundState extends State<AnimatedBackground>
     with TickerProviderStateMixin {
-  late final AnimationController _slowController;
-  late final AnimationController _mediumController;
+  late final AnimationController _slow = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 18),
+  )..repeat();
 
-  @override
-  void initState() {
-    super.initState();
-    _slowController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 18),
-    )..repeat();
-    _mediumController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 10),
-    )..repeat(reverse: true);
-  }
+  late final AnimationController _medium = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 10),
+  )..repeat(reverse: true);
+
+  late final Listenable _repaint =
+      Listenable.merge([_slow, _medium, AppScroll.offset]);
 
   @override
   void dispose() {
-    _slowController.dispose();
-    _mediumController.dispose();
+    _slow.dispose();
+    _medium.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final device = deviceTypeFromWidth(width);
     final isLight = isLightMode(context);
-    final orbScale = device == DeviceType.desktop
-        ? 1.0
-        : device == DeviceType.tablet
-            ? 0.75
-            : 0.55;
+    final orbScale = context.responsive(
+      mobile: 0.55,
+      tablet: 0.75,
+      desktop: 1.0,
+    );
 
-    final baseGradient = isLight
-        ? const [
-            Color(0xFFF8FAFC),
-            Color(0xFFE2E8F0),
-            Color(0xFFEDE9FE),
-          ]
-        : const [
-            Color(0xFF050A1A),
-            Color(0xFF0A1230),
-            Color(0xFF0E0B26),
-          ];
-    final orbOpacity = isLight ? 0.18 : 0.10;
-    final vignetteColor = isLight
-        ? Colors.white.withValues(alpha: 0.20)
-        : Colors.black.withValues(alpha: 0.35);
-
-    return AnimatedBuilder(
-      animation: Listenable.merge([_slowController, _mediumController]),
-      builder: (context, _) {
-        final slow = _slowController.value;
-        final medium = _mediumController.value;
-
-        return ValueListenableBuilder<double>(
-          valueListenable: AppScroll.offset,
-          builder: (context, scroll, _) {
-            // Parallax: orbs drift up slower than scroll. Each orb moves at
-            // a slightly different rate so they decouple visually.
-            final p1 = -scroll * 0.12;
-            final p2 = -scroll * 0.08;
-            final p3 = -scroll * 0.18;
-
-            return Stack(
-              children: [
-                // Base gradient
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: baseGradient,
-                    ),
-                  ),
-                ),
-                // Orb 1 — gold (top)
-                _Orb(
-                  left: 40 + 120 * slow,
-                  top: 60 + 40 * (1 - medium) + p1,
-                  size: 320 * orbScale,
-                  color: const Color(0xFFFFD700),
-                  opacity: orbOpacity,
-                ),
-                // Orb 2 — blue (mid-right)
-                _Orb(
-                  right: 30 + 90 * (1 - slow),
-                  top: 250 + 100 * medium + p2,
-                  size: 360 * orbScale,
-                  color: const Color(0xFF40C4FF),
-                  opacity: orbOpacity,
-                ),
-                // Orb 3 — purple (bottom-left)
-                _Orb(
-                  left: 100 + 60 * medium,
-                  bottom: 80 + 80 * (1 - slow) - p3,
-                  size: 300 * orbScale,
-                  color: const Color(0xFF9C7BFF),
-                  opacity: orbOpacity - 0.01,
-                ),
-                // Vignette
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: RadialGradient(
-                      center: Alignment.center,
-                      radius: 1.3,
-                      colors: [
-                        Colors.transparent,
-                        vignetteColor,
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
+    return RepaintBoundary(
+      child: CustomPaint(
+        painter: _BackdropPainter(
+          repaint: _repaint,
+          slow: _slow,
+          medium: _medium,
+          scroll: AppScroll.offset,
+          orbScale: orbScale,
+          isLight: isLight,
+        ),
+        // Expands to fill the Stack it sits in without needing a child.
+        size: Size.infinite,
+      ),
     );
   }
 }
 
-class _Orb extends StatelessWidget {
-  final double? left;
-  final double? right;
-  final double? top;
-  final double? bottom;
-  final double size;
-  final Color color;
-  final double opacity;
+class _BackdropPainter extends CustomPainter {
+  final Animation<double> slow;
+  final Animation<double> medium;
+  final ValueListenable<double> scroll;
+  final double orbScale;
+  final bool isLight;
 
-  const _Orb({
-    this.left,
-    this.right,
-    this.top,
-    this.bottom,
-    required this.size,
-    required this.color,
-    required this.opacity,
-  });
+  _BackdropPainter({
+    required Listenable repaint,
+    required this.slow,
+    required this.medium,
+    required this.scroll,
+    required this.orbScale,
+    required this.isLight,
+  }) : super(repaint: repaint);
 
   @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      left: left,
-      right: right,
-      top: top,
-      bottom: bottom,
-      child: IgnorePointer(
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: RadialGradient(
-              colors: [
-                color.withValues(alpha: opacity),
-                Colors.transparent,
-              ],
-            ),
-          ),
-        ),
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final s = slow.value;
+    final m = medium.value;
+    final offset = scroll.value;
+
+    _paintBaseGradient(canvas, rect);
+
+    final orbOpacity = isLight ? 0.18 : 0.10;
+
+    // Each orb drifts at its own fraction of the scroll offset so they
+    // decouple visually instead of moving as one sheet.
+    _paintOrb(
+      canvas,
+      center: Offset(40 + 120 * s, 60 + 40 * (1 - m) - offset * 0.12),
+      diameter: 320 * orbScale,
+      color: AppColors.gold,
+      opacity: orbOpacity,
+    );
+    _paintOrb(
+      canvas,
+      center: Offset(
+        size.width - (30 + 90 * (1 - s)),
+        250 + 100 * m - offset * 0.08,
       ),
+      diameter: 360 * orbScale,
+      color: AppColors.cyan,
+      opacity: orbOpacity,
+    );
+    _paintOrb(
+      canvas,
+      center: Offset(
+        100 + 60 * m,
+        size.height - (80 + 80 * (1 - s)) + offset * 0.18,
+      ),
+      diameter: 300 * orbScale,
+      color: AppColors.purple,
+      opacity: orbOpacity - 0.01,
+    );
+
+    _paintVignette(canvas, rect);
+  }
+
+  void _paintBaseGradient(Canvas canvas, Rect rect) {
+    final colors = isLight ? AppColors.backdropLight : AppColors.backdropDark;
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.transparent, Colors.transparent],
+        ).createShader(rect)
+        ..shader = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: colors,
+        ).createShader(rect),
     );
   }
+
+  void _paintOrb(
+    Canvas canvas, {
+    required Offset center,
+    required double diameter,
+    required Color color,
+    required double opacity,
+  }) {
+    final radius = diameter / 2;
+    // Top-left anchored like the original Positioned boxes, so the drift
+    // geometry matches the previous design exactly.
+    final orbCenter = center + Offset(radius, radius);
+    final bounds = Rect.fromCircle(center: orbCenter, radius: radius);
+
+    canvas.drawCircle(
+      orbCenter,
+      radius,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [color.withValues(alpha: opacity), Colors.transparent],
+        ).createShader(bounds),
+    );
+  }
+
+  void _paintVignette(Canvas canvas, Rect rect) {
+    final color = isLight
+        ? Colors.white.withValues(alpha: 0.20)
+        : Colors.black.withValues(alpha: 0.35);
+
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = RadialGradient(
+          radius: 1.3,
+          colors: [Colors.transparent, color],
+        ).createShader(rect),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _BackdropPainter old) =>
+      old.orbScale != orbScale || old.isLight != isLight;
 }

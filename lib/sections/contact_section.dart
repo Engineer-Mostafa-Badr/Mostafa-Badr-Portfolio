@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:mostafa_badr_portfolio/core/constants/app_links.dart';
+import 'package:mostafa_badr_portfolio/core/constants/app_sizes.dart';
+import 'package:mostafa_badr_portfolio/core/utils/responsive.dart';
+import 'package:mostafa_badr_portfolio/core/utils/url_launcher_service.dart';
 import 'package:mostafa_badr_portfolio/utils/app_locale.dart';
 import 'package:mostafa_badr_portfolio/utils/contact_links.dart';
-import 'package:mostafa_badr_portfolio/utils/device_type.dart';
-import 'package:mostafa_badr_portfolio/utils/url_utils.dart';
+import 'package:mostafa_badr_portfolio/widgets/common/app_button.dart';
+import 'package:mostafa_badr_portfolio/widgets/common/gradient_text.dart';
 import 'package:mostafa_badr_portfolio/widgets/glass_card.dart';
 import 'package:mostafa_badr_portfolio/widgets/inline_contact_form.dart';
 import 'package:mostafa_badr_portfolio/widgets/section_header.dart';
@@ -32,161 +36,111 @@ class ContactCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final isMobile = deviceTypeFromWidth(width) == DeviceType.mobile;
-    final ar = isArabic(context);
+    final isMobile = context.isMobile;
 
     return GlassCard(
-      padding: EdgeInsets.all(isMobile ? 18 : 28),
+      padding: EdgeInsets.all(isMobile ? AppSizes.headerGap : 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ShaderMask(
-            shaderCallback: (rect) => const LinearGradient(
-              colors: [Color(0xFFFFD700), Color(0xFF40C4FF)],
-            ).createShader(rect),
-            child: Text(
-              ar ? 'يلا نبني حاجة مع بعض' : "Let's build something together",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: isMobile ? 20 : 26,
-                fontWeight: FontWeight.w800,
-                height: 1.2,
-              ),
+          GradientText(
+            Tr.k(context, 'contact.heading'),
+            style: TextStyle(
+              fontSize: isMobile ? 20 : 26,
+              fontWeight: FontWeight.w800,
+              height: 1.2,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSizes.md - 2),
           Text(
-            ar
-                ? 'عندك مشروع Flutter في بالك، أو عايز نتكلم عن فرصة عمل؟ '
-                    'أنا على بُعد رسالة.'
-                : 'Have a Flutter project in mind, or want to chat about a role? '
-                    "I'm one message away.",
+            Tr.k(context, 'contact.body'),
             style: TextStyle(
               color: Colors.grey[300],
               fontSize: isMobile ? 13 : 15,
               height: 1.6,
             ),
           ),
-          const SizedBox(height: 18),
-          // Inline form — primary path for visitors who'd rather type than
-          // open WhatsApp.
+          const SizedBox(height: AppSizes.headerGap),
+          // Inline form — the primary path for visitors who would rather type
+          // than switch apps.
           const InlineContactForm(),
           const SizedBox(height: 22),
-          // Divider with "or" label
-          Row(
-            children: [
-              Expanded(
-                child: Divider(
-                  color: Colors.white.withValues(alpha: 0.10),
-                  thickness: 1,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Text(
-                  ar ? 'أو' : 'OR',
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Divider(
-                  color: Colors.white.withValues(alpha: 0.10),
-                  thickness: 1,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              ElevatedButton.icon(
-                onPressed: () =>
-                    openUrl(scheduleCallLink(arabic: isArabic(context))),
-                icon: const Icon(Icons.chat_bubble_outline_rounded, size: 16),
-                label: Text(Tr.k(context, 'contact.whatsapp')),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFD700),
-                  foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 14,
-                  ),
-                  textStyle: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              ..._contactChannels.map(
-                (channel) => OutlinedButton.icon(
-                  onPressed: () => openUrl(channel.url),
-                  icon: Icon(channel.icon, size: 16),
-                  label: Text(channel.label.t(context)),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: BorderSide(
-                      color: Colors.white.withValues(alpha: 0.3),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                    textStyle: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          const _OrDivider(),
+          const SizedBox(height: AppSizes.headerGap),
+          const _ContactChannelButtons(),
         ],
       ),
     );
   }
 }
 
-class ContactChannel {
-  final L18n label;
-  final String url;
-  final IconData icon;
+class _OrDivider extends StatelessWidget {
+  const _OrDivider();
 
-  const ContactChannel({
-    required this.label,
-    required this.url,
-    required this.icon,
-  });
+  @override
+  Widget build(BuildContext context) {
+    final line = Divider(
+      color: Colors.white.withValues(alpha: 0.10),
+      thickness: 1,
+    );
+
+    return Row(
+      children: [
+        Expanded(child: line),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
+          child: Text(
+            Tr.k(context, 'common.or'),
+            style: TextStyle(
+              color: Colors.grey[500],
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ),
+        Expanded(child: line),
+      ],
+    );
+  }
 }
 
-const _contactChannels = [
-  ContactChannel(
-    label: L18n('Email', 'إيميل'),
-    url:
-        'mailto:mostafamostafabadrbadr@gmail.com?subject=Contact%20from%20Portfolio&body=Hi%20Mostafa%2C%0A%0AI%27d%20like%20to%20talk%20about%20...',
-    icon: Icons.email_outlined,
-  ),
-  ContactChannel(
-    label: L18n('LinkedIn', 'لينكدإن'),
-    url: 'https://www.linkedin.com/in/engineer-mostafa-badr/',
-    icon: Icons.link,
-  ),
-  ContactChannel(
-    label: L18n('GitHub', 'جيت هاب'),
-    url: 'https://github.com/Engineer-Mostafa-Badr',
-    icon: Icons.code,
-  ),
-];
+class _ContactChannelButtons extends StatelessWidget {
+  const _ContactChannelButtons();
+
+  @override
+  Widget build(BuildContext context) {
+    final ar = isArabic(context);
+
+    return Wrap(
+      spacing: AppSizes.md - 2,
+      runSpacing: AppSizes.md - 2,
+      children: [
+        AppButton(
+          label: Tr.k(context, 'contact.whatsapp'),
+          icon: Icons.chat_bubble_outline_rounded,
+          onPressed: () =>
+              openUrl(scheduleCallLink(arabic: ar), context: context),
+        ),
+        AppButton(
+          label: Tr.k(context, 'contact.email'),
+          icon: Icons.email_outlined,
+          variant: AppButtonVariant.secondary,
+          onPressed: () => openUrl(emailLink(arabic: ar), context: context),
+        ),
+        AppButton(
+          label: Tr.k(context, 'contact.linkedin'),
+          icon: Icons.link,
+          variant: AppButtonVariant.secondary,
+          onPressed: () => openUrl(AppLinks.linkedIn, context: context),
+        ),
+        AppButton(
+          label: Tr.k(context, 'contact.github'),
+          icon: Icons.code,
+          variant: AppButtonVariant.secondary,
+          onPressed: () => openUrl(AppLinks.github, context: context),
+        ),
+      ],
+    );
+  }
+}

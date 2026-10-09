@@ -1,4 +1,4 @@
-﻿name: mostafa_badr_portfolio
+name: mostafa_badr_portfolio
 description: "Mostafa Badr personal portfolio showcasing cross-platform Flutter work."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -45,6 +45,7 @@ dependencies:
   animated_text_kit: ^4.3.0
   visibility_detector: ^0.4.0+2
   http: ^1.2.2
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:
@@ -77,8 +78,11 @@ flutter:
     - assets/images/haj/
     - assets/images/logo/
     - assets/images/my_photo/
+    - assets/images/rack/
     - assets/images/saqqar/
-    - assets/images/vistis/
+    - assets/images/sijil/
+    - assets/images/sprints/
+    - assets/images/visits/
     - assets/images/hr/
 
   # An image asset can refer to one or more resolution-specific "variants", see

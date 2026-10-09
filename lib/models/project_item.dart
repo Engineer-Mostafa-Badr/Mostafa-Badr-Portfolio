@@ -32,7 +32,7 @@ class ProjectCoverSpec {
   });
 }
 
-enum ProjectCategory { erp, realEstate, ecommerce, superApp, rideHailing }
+enum ProjectCategory { erp, realEstate, ecommerce, superApp, rideHailing, ar }
 
 extension ProjectCategoryX on ProjectCategory {
   String get labelKey {
@@ -47,6 +47,8 @@ extension ProjectCategoryX on ProjectCategory {
         return 'projects.cat.superApp';
       case ProjectCategory.rideHailing:
         return 'projects.cat.rideHailing';
+      case ProjectCategory.ar:
+        return 'projects.cat.ar';
     }
   }
 }
@@ -58,6 +60,10 @@ class ProjectItem {
   final List<String> images;
   final String apkUrl;
   final String repoUrl;
+
+  /// Optional third link (product site / landing page). When provided, the
+  /// lightbox renders an extra "Website" action next to the store buttons.
+  final String? websiteUrl;
   final List<String> techs;
   final L18n statusLabel;
   final Color statusColor;
@@ -72,6 +78,7 @@ class ProjectItem {
     required this.images,
     required this.apkUrl,
     required this.repoUrl,
+    this.websiteUrl,
     required this.techs,
     required this.statusLabel,
     required this.statusColor,

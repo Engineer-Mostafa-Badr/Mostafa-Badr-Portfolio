@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:mostafa_badr_portfolio/core/constants/app_colors.dart';
+import 'package:mostafa_badr_portfolio/core/constants/app_sizes.dart';
+import 'package:mostafa_badr_portfolio/core/utils/url_launcher_service.dart';
 import 'package:mostafa_badr_portfolio/utils/app_locale.dart';
 import 'package:mostafa_badr_portfolio/utils/app_theme.dart';
 import 'package:mostafa_badr_portfolio/utils/contact_links.dart';
-import 'package:mostafa_badr_portfolio/utils/url_utils.dart';
+import 'package:mostafa_badr_portfolio/widgets/common/app_button.dart';
+import 'package:mostafa_badr_portfolio/widgets/common/gradient_text.dart';
 
 class SectionTarget {
   final String labelKey;
@@ -25,11 +29,11 @@ class _TopBarState extends State<TopBar> {
   String? _hoveredLabel;
 
   Future<void> _scrollToSection(GlobalKey targetKey) async {
-    final context = targetKey.currentContext;
-    if (context == null) return;
+    final ctx = targetKey.currentContext;
+    if (ctx == null || !ctx.mounted) return;
     await Scrollable.ensureVisible(
-      context,
-      duration: const Duration(milliseconds: 700),
+      ctx,
+      duration: AppDurations.scrollTo,
       curve: Curves.easeInOutCubic,
       alignment: 0.05,
     );
@@ -41,22 +45,21 @@ class _TopBarState extends State<TopBar> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        // Decided from the actual available width, not the window: the bar
+        // sits inside the page gutter, so the window would over-report room.
+        // Full nav needs name(~140) + 6 items(~500) + toggles(140) + CTA(130)
+        // + padding ≈ 1050px uncompressed.
         final width = constraints.maxWidth;
-        // Decide layout from the actual available width, not the screen width.
-        // Full nav needs: name(~140) + 6 items(~500) + spacer + toggles(140)
-        // + CTA(130) + paddings ≈ ~1050px when everything is uncompressed.
-        // Below that, fall back to the compact (menu-drawer) layout.
-        final isCompact = width < 1050;
-        final isUltraCompact = width < 520;
-        final nameFontSize = isCompact ? 18.0 : 20.0;
+        final isCompact = width < AppBreakpoints.topBarFullNav;
+        final isUltraCompact = width < AppBreakpoints.topBarTightPadding;
 
         return Container(
           padding: EdgeInsets.symmetric(
             horizontal: isUltraCompact ? 14 : 22,
-            vertical: 12,
+            vertical: AppSizes.md,
           ),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppSizes.radiusXl - 2),
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -67,118 +70,125 @@ class _TopBarState extends State<TopBar> {
           child: Row(
             children: [
               Flexible(
-                child: ShaderMask(
-                  shaderCallback: (rect) => const LinearGradient(
-                    colors: [Color(0xFFFFD700), Color(0xFF40C4FF)],
-                  ).createShader(rect),
-                  child: Text(
-                    isArabic(context) ? 'مصطفى بدر' : 'Mostafa Badr',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: nameFontSize,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: 0.5,
-                    ),
+                child: GradientText(
+                  Tr.k(context, 'hero.name'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: isCompact ? 18 : 20,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSizes.sm),
               const Spacer(),
               if (!isCompact) ...[
                 Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: widget.sectionTargets.map((target) {
-                    final hovering = _hoveredLabel == target.labelKey;
-                    return MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      onEnter: (_) =>
-                          setState(() => _hoveredLabel = target.labelKey),
-                      onExit: (_) => setState(() => _hoveredLabel = null),
-                      child: GestureDetector(
-                        onTap: () => _scrollToSection(target.key),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 8,
-                          ),
-                          margin: const EdgeInsets.symmetric(horizontal: 1),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            color: hovering
-                                ? AppPalette.accentCyan
-                                    .withValues(alpha: 0.12)
-                                : Colors.transparent,
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                Tr.k(context, target.labelKey),
-                                style: TextStyle(
-                                  color: hovering
-                                      ? AppPalette.accentCyan
-                                      : palette.textSecondary,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              const SizedBox(height: 3),
-                              AnimatedContainer(
-                                duration: const Duration(milliseconds: 220),
-                                height: 2,
-                                width: hovering ? 22 : 0,
-                                decoration: BoxDecoration(
-                                  color: AppPalette.accentCyan,
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
-                              ),
-                            ],
-                          ),
+                  children: [
+                    for (final target in widget.sectionTargets)
+                      _NavItem(
+                        labelKey: target.labelKey,
+                        hovering: _hoveredLabel == target.labelKey,
+                        onHoverChanged: (hovering) => setState(
+                          () => _hoveredLabel =
+                              hovering ? target.labelKey : null,
                         ),
+                        onTap: () => _scrollToSection(target.key),
                       ),
-                    );
-                  }).toList(),
+                  ],
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSizes.sm),
                 const _LocaleToggleButton(),
-                const SizedBox(width: 6),
+                const SizedBox(width: AppSizes.xs + 2),
                 const _ThemeToggleButton(),
-                const SizedBox(width: 10),
-                ElevatedButton.icon(
-                  onPressed: () =>
-                      openUrl(hireMeLink(arabic: isArabic(context))),
-                  icon: const Icon(Icons.chat_bubble_outline_rounded, size: 16),
-                  label: Text(Tr.k(context, 'nav.hireMe')),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFD700),
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 12,
-                    ),
-                    textStyle: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                const SizedBox(width: AppSizes.md - 2),
+                AppButton(
+                  label: Tr.k(context, 'nav.hireMe'),
+                  icon: Icons.chat_bubble_outline_rounded,
+                  size: AppButtonSize.small,
+                  onPressed: () => openUrl(
+                    hireMeLink(arabic: isArabic(context)),
+                    context: context,
                   ),
                 ),
               ] else ...[
                 const _LocaleToggleButton(),
-                const SizedBox(width: 6),
+                const SizedBox(width: AppSizes.xs + 2),
                 const _ThemeToggleButton(),
-                const SizedBox(width: 6),
+                const SizedBox(width: AppSizes.xs + 2),
                 _MobileNavButton(targets: widget.sectionTargets),
               ],
             ],
           ),
         ).animate().fadeIn(duration: 600.ms).slideY(begin: -0.3, end: 0);
       },
+    );
+  }
+}
+
+class _NavItem extends StatelessWidget {
+  final String labelKey;
+  final bool hovering;
+  final ValueChanged<bool> onHoverChanged;
+  final VoidCallback onTap;
+
+  const _NavItem({
+    required this.labelKey,
+    required this.hovering,
+    required this.onHoverChanged,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = AppPalette.of(context);
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => onHoverChanged(true),
+      onExit: (_) => onHoverChanged(false),
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.md - 2,
+            vertical: AppSizes.sm,
+          ),
+          margin: const EdgeInsets.symmetric(horizontal: 1),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+            color: hovering
+                ? AppColors.cyan.withValues(alpha: 0.12)
+                : Colors.transparent,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                Tr.k(context, labelKey),
+                style: TextStyle(
+                  color: hovering ? AppColors.cyan : palette.textSecondary,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 3),
+              AnimatedContainer(
+                duration: AppDurations.quick,
+                height: 2,
+                width: hovering ? 22 : 0,
+                decoration: BoxDecoration(
+                  color: AppColors.cyan,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -195,13 +205,13 @@ class _ThemeToggleButton extends StatelessWidget {
       message: Tr.k(context, isLight ? 'theme.toDark' : 'theme.toLight'),
       child: InkWell(
         onTap: AppThemeController.toggle,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
+          duration: AppDurations.quick,
           padding: const EdgeInsets.all(9),
           decoration: BoxDecoration(
             color: palette.pillBackground,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
             border: Border.all(color: palette.pillBorder),
           ),
           child: AnimatedSwitcher(
@@ -209,14 +219,10 @@ class _ThemeToggleButton extends StatelessWidget {
             transitionBuilder: (child, anim) =>
                 ScaleTransition(scale: anim, child: child),
             child: Icon(
-              isLight
-                  ? Icons.dark_mode_outlined
-                  : Icons.light_mode_outlined,
+              isLight ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
               key: ValueKey(isLight),
               size: 18,
-              color: isLight
-                  ? AppPalette.accentPurple
-                  : AppPalette.accentGold,
+              color: isLight ? AppColors.purple : AppColors.gold,
             ),
           ),
         ),
@@ -237,24 +243,20 @@ class _LocaleToggleButton extends StatelessWidget {
       message: Tr.k(context, isAr ? 'locale.toEn' : 'locale.toAr'),
       child: InkWell(
         onTap: AppLocaleController.toggle,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
+          duration: AppDurations.quick,
           padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
           decoration: BoxDecoration(
             color: palette.pillBackground,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
             border: Border.all(color: palette.pillBorder),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.language,
-                size: 14,
-                color: AppPalette.accentCyan,
-              ),
-              const SizedBox(width: 6),
+              const Icon(Icons.language, size: 14, color: AppColors.cyan),
+              const SizedBox(width: AppSizes.xs + 2),
               Text(
                 isAr ? 'EN' : 'AR',
                 style: TextStyle(
@@ -277,47 +279,48 @@ class _MobileNavButton extends StatelessWidget {
   const _MobileNavButton({required this.targets});
 
   Future<void> _openMenu(BuildContext context) async {
-    final palette = AppPalette.of(context);
     final selected = await showModalBottomSheet<SectionTarget>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) {
-        return _MobileNavSheet(targets: targets, palette: palette);
-      },
+      builder: (_) => _MobileNavSheet(targets: targets),
     );
-    if (selected != null) {
-      final target = selected.key.currentContext;
-      if (target != null && target.mounted) {
-        await Scrollable.ensureVisible(
-          target,
-          duration: const Duration(milliseconds: 700),
-          curve: Curves.easeInOutCubic,
-          alignment: 0.05,
-        );
-      }
-    }
+    if (selected == null) return;
+
+    final ctx = selected.key.currentContext;
+    if (ctx == null || !ctx.mounted) return;
+    await Scrollable.ensureVisible(
+      ctx,
+      duration: AppDurations.scrollTo,
+      curve: Curves.easeInOutCubic,
+      alignment: 0.05,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final palette = AppPalette.of(context);
+
     return Tooltip(
-      message: isArabic(context) ? 'القائمة' : 'Menu',
-      child: InkWell(
-        onTap: () => _openMenu(context),
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          padding: const EdgeInsets.all(9),
-          decoration: BoxDecoration(
-            color: palette.pillBackground,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: palette.pillBorder),
-          ),
-          child: const Icon(
-            Icons.menu_rounded,
-            size: 18,
-            color: AppPalette.accentCyan,
+      message: Tr.k(context, 'common.menu'),
+      child: Semantics(
+        button: true,
+        label: Tr.k(context, 'common.menu'),
+        child: InkWell(
+          onTap: () => _openMenu(context),
+          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+          child: Container(
+            padding: const EdgeInsets.all(9),
+            decoration: BoxDecoration(
+              color: palette.pillBackground,
+              borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+              border: Border.all(color: palette.pillBorder),
+            ),
+            child: const Icon(
+              Icons.menu_rounded,
+              size: 18,
+              color: AppColors.cyan,
+            ),
           ),
         ),
       ),
@@ -327,83 +330,79 @@ class _MobileNavButton extends StatelessWidget {
 
 class _MobileNavSheet extends StatelessWidget {
   final List<SectionTarget> targets;
-  final AppPalette palette;
-  const _MobileNavSheet({required this.targets, required this.palette});
+  const _MobileNavSheet({required this.targets});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF0E152B), Color(0xFF1A1130)],
+    final palette = AppPalette.of(context);
+
+    return SafeArea(
+      top: false,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: AppColors.modalSurface,
+          ),
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(22),
+          ),
+          border: Border.all(color: palette.cardBorder),
         ),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
-        border: Border.all(color: palette.cardBorder),
-      ),
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Container(
-              width: 44,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.20),
-                borderRadius: BorderRadius.circular(2),
+        padding: const EdgeInsets.fromLTRB(
+          AppSizes.xl,
+          14,
+          AppSizes.xl,
+          28,
+        ),
+        // Scrolls if the sheet ever outgrows a short screen (landscape phone,
+        // or a keyboard-shrunk viewport).
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 44,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.20),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(height: AppSizes.lg),
+              GradientText(
+                Tr.k(context, 'nav.jumpTo'),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 18,
+                  letterSpacing: 0.3,
+                ),
+              ),
+              const SizedBox(height: 14),
+              for (final target in targets)
+                _MobileNavRow(
+                  target: target,
+                  onTap: () => Navigator.of(context).pop(target),
+                ),
+              const SizedBox(height: 14),
+              AppButton(
+                label: Tr.k(context, 'nav.hireMe'),
+                icon: Icons.chat_bubble_outline_rounded,
+                expand: true,
+                onPressed: () {
+                  final navigator = Navigator.of(context);
+                  final url = hireMeLink(arabic: isArabic(context));
+                  navigator.pop();
+                  openUrl(url, context: context);
+                },
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          ShaderMask(
-            shaderCallback: (rect) => const LinearGradient(
-              colors: [Color(0xFFFFD700), Color(0xFF40C4FF)],
-            ).createShader(rect),
-            child: Text(
-              isArabic(context) ? 'الانتقال إلى' : 'Jump to',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-                fontSize: 18,
-                letterSpacing: 0.3,
-              ),
-            ),
-          ),
-          const SizedBox(height: 14),
-          ...targets.map(
-            (target) => _MobileNavRow(
-              target: target,
-              onTap: () => Navigator.of(context).pop(target),
-            ),
-          ),
-          const SizedBox(height: 14),
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.of(context).pop();
-              openUrl(hireMeLink(arabic: isArabic(context)));
-            },
-            icon: const Icon(Icons.chat_bubble_outline_rounded, size: 16),
-            label: Text(Tr.k(context, 'nav.hireMe')),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFFD700),
-              foregroundColor: Colors.black,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 18,
-                vertical: 14,
-              ),
-              textStyle: const TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 14,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -412,6 +411,7 @@ class _MobileNavSheet extends StatelessWidget {
 class _MobileNavRow extends StatelessWidget {
   final SectionTarget target;
   final VoidCallback onTap;
+
   const _MobileNavRow({required this.target, required this.onTap});
 
   static const Map<String, IconData> _iconForKey = {
@@ -426,27 +426,31 @@ class _MobileNavRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final icon = _iconForKey[target.labelKey] ?? Icons.chevron_right;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Material(
         color: Colors.white.withValues(alpha: 0.04),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppSizes.radiusLg),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppSizes.radiusLg),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: AppSizes.md,
+            ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(7),
                   decoration: BoxDecoration(
-                    color: AppPalette.accentCyan.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
+                    color: AppColors.cyan.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                   ),
-                  child: Icon(icon, size: 16, color: AppPalette.accentCyan),
+                  child: Icon(icon, size: 16, color: AppColors.cyan),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSizes.md),
                 Expanded(
                   child: Text(
                     Tr.k(context, target.labelKey),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:mostafa_badr_portfolio/utils/app_theme.dart';
-import 'package:mostafa_badr_portfolio/utils/device_type.dart';
+import 'package:mostafa_badr_portfolio/core/utils/responsive.dart';
 
 class SectionHeader extends StatelessWidget {
   final String eyebrow;

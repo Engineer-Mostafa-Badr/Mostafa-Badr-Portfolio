@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:mostafa_badr_portfolio/core/constants/app_colors.dart';
+import 'package:mostafa_badr_portfolio/core/constants/app_sizes.dart';
+import 'package:mostafa_badr_portfolio/core/utils/responsive.dart';
 import 'package:mostafa_badr_portfolio/utils/app_locale.dart';
-import 'package:mostafa_badr_portfolio/utils/device_type.dart';
 import 'package:mostafa_badr_portfolio/widgets/glass_card.dart';
 import 'package:mostafa_badr_portfolio/widgets/section_header.dart';
 
@@ -28,55 +30,50 @@ class EducationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final isMobile = deviceTypeFromWidth(width) == DeviceType.mobile;
-    final ar = isArabic(context);
+    final isMobile = context.isMobile;
 
     return GlassCard(
-      padding: EdgeInsets.all(isMobile ? 16 : 22),
+      padding: EdgeInsets.all(isMobile ? AppSizes.lg : 22),
       hoverable: true,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(AppSizes.md),
             decoration: BoxDecoration(
-              color: const Color(0xFF40C4FF).withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
+              color: AppColors.cyan.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(AppSizes.radiusLg),
             ),
             child: const Icon(
               Icons.school_outlined,
               size: 32,
-              color: Color(0xFF40C4FF),
+              color: AppColors.cyan,
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSizes.lg),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  ar
-                      ? 'بكالوريوس — كلية الحاسبات و المعلومات'
-                      : 'Bachelor — Faculty of Computers and Information',
+                  Tr.k(context, 'education.degree'),
                   style: TextStyle(
                     fontSize: isMobile ? 16 : 18,
                     fontWeight: FontWeight.w800,
                     color: Colors.white,
+                    height: 1.3,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: AppSizes.xs + 2),
                 Text(
-                  ar
-                      ? 'جامعة طنطا، طنطا، مصر'
-                      : 'Tanta University, Tanta, Egypt',
+                  Tr.k(context, 'education.university'),
                   style: TextStyle(
-                    color: const Color(0xFF40C4FF),
+                    color: AppColors.cyan,
                     fontSize: isMobile ? 13 : 15,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSizes.sm),
                 Row(
                   children: [
                     Icon(
@@ -84,12 +81,16 @@ class EducationCard extends StatelessWidget {
                       size: 13,
                       color: Colors.grey[500],
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      ar ? 'أكتوبر 2023 – أغسطس 2027' : 'Oct 2023 – Aug 2027',
-                      style: TextStyle(
-                        color: Colors.grey[400],
-                        fontSize: isMobile ? 12 : 13,
+                    const SizedBox(width: AppSizes.xs + 2),
+                    // Flexible so a longer localized date string wraps rather
+                    // than pushing past the card on a narrow phone.
+                    Flexible(
+                      child: Text(
+                        Tr.k(context, 'education.dates'),
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: isMobile ? 12 : 13,
+                        ),
                       ),
                     ),
                   ],

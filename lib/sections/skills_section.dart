@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:mostafa_badr_portfolio/utils/app_locale.dart';
-import 'package:mostafa_badr_portfolio/utils/device_type.dart';
+import 'package:mostafa_badr_portfolio/core/utils/responsive.dart';
 import 'package:mostafa_badr_portfolio/utils/skill_icons.dart';
 import 'package:mostafa_badr_portfolio/widgets/glass_card.dart';
 import 'package:mostafa_badr_portfolio/widgets/section_header.dart';
@@ -89,7 +89,7 @@ const List<_SkillGroup> _skillGroups = [
       L18n('OpenStreetMap (flutter_map)', 'OpenStreetMap (flutter_map)'),
       L18n('Geolocation & GPS', 'Geolocation و GPS'),
       L18n('OTP Authentication', 'مصادقة OTP'),
-      L18n('Voice Recording & Whisper', 'تسجيل صوتي و Whisper'),
+      L18n('Voice Input & Speech-to-Text', 'إدخال صوتي وتحويل لنص'),
       L18n('Share Intent (In/Out)', 'Share Intent (دخول/خروج)'),
       L18n('File Picker & Documents', 'File Picker و المستندات'),
       L18n('QR & NFC Scanning', 'مسح QR و NFC'),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:mostafa_badr_portfolio/utils/app_locale.dart';
-import 'package:mostafa_badr_portfolio/utils/device_type.dart';
+import 'package:mostafa_badr_portfolio/core/utils/responsive.dart';
 import 'package:mostafa_badr_portfolio/widgets/glass_card.dart';
 import 'package:mostafa_badr_portfolio/widgets/section_header.dart';
 
@@ -91,16 +91,20 @@ const _experienceEntries = <_ExperienceEntry>[
         'سلّمت تطبيق الراجحي للحج على Apple App Store + Google Play — منصة حج ثنائية اللغة بدورين للحجاج و المشرفين، متكاملة مع Odoo ERP عبر REST APIs.',
       ),
       L18n(
-        'Built Saqqar mobile — AI agent that operates Odoo via natural language; voice transcription (Whisper), share-intent from WhatsApp/Photos/Files, encrypted credential vault, and inline approval cards.',
-        'بنيت Saqqar Mobile — وكيل AI بيشغّل Odoo بلغة طبيعية؛ إملاء صوتي (Whisper) و share-intent من واتساب/الصور/الملفات و vault مشفّر للبيانات الحساسة و بطاقات موافقة inline.',
+        'Built Saqqar mobile — AI agent that operates Odoo via natural language; voice input, share-intent from WhatsApp/Photos/Files, a credentials vault, Business Pulse cards, and inline approvals that also work from Apple Watch.',
+        'بنيت Saqqar Mobile — وكيل AI بيشغّل Odoo بلغة طبيعية؛ إدخال صوتي، و share-intent من واتساب/الصور/الملفات، وخزنة اعتماد، وكروت Business Pulse، وموافقات inline بتشتغل كمان من Apple Watch.',
       ),
       L18n(
-        'Delivered Customer Visits — field-sales GPS tracker with battery-aware live foreground location, offline queue with auto-sync, and a manager dashboard backed by Odoo 19.',
-        'سلّمت Customer Visits — تتبّع GPS للمبيعات الميدانية مع موقع لايف يحترم البطارية و offline queue بمزامنة تلقائية و dashboard للمدير مدعومة بـ Odoo 19.',
+        'Delivered Field Visits — GPS-verified visit management with route capture, an approval workflow with push notifications, an offline action queue, and a manager dashboard.',
+        'سلّمت Field Visits — إدارة زيارات ميدانية موثّقة بالـ GPS مع تسجيل المسار، ودورة اعتماد بإشعارات فورية، وطابور إجراءات أوفلاين، ولوحة للمدير.',
       ),
       L18n(
-        'Architected HR multi-tenant Companion — one binary on the store, each company points it at their own Odoo 18 server on first launch; Clean Architecture, SafeCubit base class, hybrid Bearer + session-cookie auth.',
-        'صمّمت تطبيق HR متعدد المؤسسات — نسخة واحدة على المتجر، كل شركة بتوجّهه على سيرفر Odoo 18 بتاعها في أول تشغيل؛ Clean Architecture و SafeCubit base class و مصادقة هجينة Bearer + session-cookie.',
+        'Architected the HR employee self-service app — dashboard, location-aware attendance, leave balances and requests, payroll and approvals on Odoo 18 over JSON-RPC; Clean Architecture with Bloc/Cubit.',
+        'صمّمت تطبيق HR للخدمة الذاتية للموظفين — لوحة رئيسية، وحضور بالموقع، وأرصدة وطلبات الإجازات، والرواتب والموافقات على Odoo 18 عبر JSON-RPC؛ Clean Architecture مع Bloc/Cubit.',
+      ),
+      L18n(
+        'Shipped DH Sprints and Sijil IT — Odoo clients that talk straight to the customer server (JSON-RPC / XML-RPC) with no middleware: tasks and timesheets in one, IT asset scanning, handover and audit in the other.',
+        'سلّمت DH Sprints و Sijil IT — تطبيقات بتتصل مباشرة بسيرفر Odoo الخاص بالعميل (JSON-RPC / XML-RPC) من غير middleware: المهام وسجلات الوقت في الأول، ومسح الأصول التقنية وتسليمها وجردها في التاني.',
       ),
       L18n(
         'Standardized observability across the team — Sentry crash reporting with environmental noise filtering, dart-defined DSN, R8/ProGuard obfuscation, and auto-uploaded debug symbols.',

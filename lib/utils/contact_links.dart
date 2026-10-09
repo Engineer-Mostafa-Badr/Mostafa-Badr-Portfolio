@@ -1,26 +1,60 @@
-// Centralized contact links for the portfolio.
-// Keeping the strings here means the WhatsApp/email/scheduling targets can be
-// updated in one place if the phone number or messaging copy ever changes.
+import 'package:mostafa_badr_portfolio/core/constants/app_links.dart';
 
-const String _whatsappNumber = '201004652998';
+/// Pre-written outreach messages.
+///
+/// These are conversation openers, not UI labels — a visitor lands in WhatsApp
+/// with the intent already explained, so the first message is never an awkward
+/// "hi". They live here rather than in [Tr] because they are payload text, not
+/// something the app renders.
+class ContactMessages {
+  const ContactMessages._();
 
-String get whatsappLink => 'https://wa.me/$_whatsappNumber';
+  static const String _scheduleEn =
+      'Hi Mostafa,\n\n'
+      'I saw your portfolio and would like to schedule a quick call to '
+      'discuss a role/project.\n\n'
+      'When would work for you in the next few days?';
 
-/// "Schedule a Call" CTA — pre-fills a professional message in WhatsApp so the
-/// visitor lands in a conversation that already explains the intent.
-String scheduleCallLink({bool arabic = false}) {
-  final message = arabic
-      ? 'مرحباً مصطفى،\n\nشفت بورتفوليوك و حابب نحجز call عشان نتكلم في فرصة عمل / مشروع.\n\nمتى يناسبك خلال الأسبوع القادم؟'
-      : 'Hi Mostafa,\n\nI saw your portfolio and would like to schedule a quick call to discuss a role/project.\n\nWhen would work for you in the next few days?';
-  final encoded = Uri.encodeComponent(message);
-  return 'https://wa.me/$_whatsappNumber?text=$encoded';
+  static const String _scheduleAr =
+      'مرحباً مصطفى،\n\n'
+      'شفت بورتفوليوك و حابب نحجز call عشان نتكلم في فرصة عمل / مشروع.\n\n'
+      'متى يناسبك خلال الأسبوع القادم؟';
+
+  static const String _hireEn =
+      'Hi Mostafa,\n\n'
+      'I would like to talk about a role / collaboration opportunity.';
+
+  static const String _hireAr =
+      'مرحباً مصطفى،\n\n'
+      'حابب أتكلم معاك عن فرصة عمل / تعاون.';
+
+  static const String _emailSubjectEn = 'Contact from Portfolio';
+  static const String _emailSubjectAr = 'تواصل من البورتفوليو';
+
+  static const String _emailBodyEn =
+      'Hi Mostafa,\n\nI would like to talk about ...';
+  static const String _emailBodyAr =
+      'مرحباً مصطفى،\n\nحابب أتكلم معاك عن ...';
 }
+
+/// Plain WhatsApp link with no pre-filled text.
+String get whatsappLink => AppLinks.whatsapp;
+
+/// "Schedule a Call" CTA — pre-fills a professional message so the visitor
+/// lands in a conversation that already explains the intent.
+String scheduleCallLink({bool arabic = false}) => AppLinks.whatsappWith(
+      arabic ? ContactMessages._scheduleAr : ContactMessages._scheduleEn,
+    );
 
 /// "Hire me" CTA — pre-fills a hire-intent message.
-String hireMeLink({bool arabic = false}) {
-  final message = arabic
-      ? 'مرحباً مصطفى،\n\nحابب أتكلم معاك عن فرصة عمل / تعاون.'
-      : 'Hi Mostafa,\n\nI would like to talk about a role / collaboration opportunity.';
-  final encoded = Uri.encodeComponent(message);
-  return 'https://wa.me/$_whatsappNumber?text=$encoded';
-}
+String hireMeLink({bool arabic = false}) => AppLinks.whatsappWith(
+      arabic ? ContactMessages._hireAr : ContactMessages._hireEn,
+    );
+
+/// `mailto:` link with a localized subject and opening line.
+String emailLink({bool arabic = false}) => AppLinks.mailto(
+      subject: arabic
+          ? ContactMessages._emailSubjectAr
+          : ContactMessages._emailSubjectEn,
+      body: arabic ? ContactMessages._emailBodyAr : ContactMessages._emailBodyEn,
+    );

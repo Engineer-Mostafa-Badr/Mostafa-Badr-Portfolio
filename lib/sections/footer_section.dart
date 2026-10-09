@@ -1,127 +1,124 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:mostafa_badr_portfolio/core/constants/app_colors.dart';
+import 'package:mostafa_badr_portfolio/core/constants/app_links.dart';
+import 'package:mostafa_badr_portfolio/core/constants/app_sizes.dart';
+import 'package:mostafa_badr_portfolio/core/utils/responsive.dart';
+import 'package:mostafa_badr_portfolio/core/utils/url_launcher_service.dart';
 import 'package:mostafa_badr_portfolio/utils/app_locale.dart';
-import 'package:mostafa_badr_portfolio/utils/app_theme.dart';
-import 'package:mostafa_badr_portfolio/utils/device_type.dart';
-import 'package:mostafa_badr_portfolio/utils/url_utils.dart';
+import 'package:mostafa_badr_portfolio/utils/contact_links.dart';
+
+/// A social profile: brand icon, brand colour, destination.
+typedef _SocialLink = ({IconData icon, Color color, String url, String name});
+
+const _socialLinks = <_SocialLink>[
+  (
+    icon: FontAwesomeIcons.linkedin,
+    color: AppColors.linkedIn,
+    url: AppLinks.linkedIn,
+    name: 'LinkedIn',
+  ),
+  (
+    icon: FontAwesomeIcons.github,
+    color: Colors.white,
+    url: AppLinks.github,
+    name: 'GitHub',
+  ),
+  (
+    icon: FontAwesomeIcons.facebook,
+    color: AppColors.facebook,
+    url: AppLinks.facebook,
+    name: 'Facebook',
+  ),
+  (
+    icon: FontAwesomeIcons.instagram,
+    color: AppColors.instagram,
+    url: AppLinks.instagram,
+    name: 'Instagram',
+  ),
+  (
+    icon: FontAwesomeIcons.tiktok,
+    color: Colors.white,
+    url: AppLinks.tiktok,
+    name: 'TikTok',
+  ),
+  (
+    icon: FontAwesomeIcons.youtube,
+    color: AppColors.youTube,
+    url: AppLinks.youtube,
+    name: 'YouTube',
+  ),
+  (
+    icon: FontAwesomeIcons.xTwitter,
+    color: Colors.white,
+    url: AppLinks.x,
+    name: 'X',
+  ),
+];
 
 class FooterSection extends StatelessWidget {
   const FooterSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final device = deviceTypeFromWidth(width);
-    final isMobile = device == DeviceType.mobile;
+    final isMobile = context.isMobile;
     final iconSize = isMobile ? 20.0 : 22.0;
     final ar = isArabic(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // ─── Social icons row ───
         Wrap(
           alignment: WrapAlignment.center,
-          spacing: 18,
-          runSpacing: 10,
+          spacing: AppSizes.headerGap,
+          runSpacing: AppSizes.md - 2,
           children: [
-            _SocialIcon(
-              icon: FontAwesomeIcons.linkedin,
-              color: const Color(0xFF0A66C2),
-              url: 'https://www.linkedin.com/in/engineer-mostafa-badr/',
-              tooltip: 'LinkedIn',
-              size: iconSize,
-            ),
-            _SocialIcon(
-              icon: FontAwesomeIcons.github,
-              color: Colors.white,
-              url: 'https://github.com/Engineer-Mostafa-Badr',
-              tooltip: 'GitHub',
-              size: iconSize,
-            ),
-            _SocialIcon(
-              icon: FontAwesomeIcons.facebook,
-              color: const Color(0xFF1877F2),
-              url: 'https://web.facebook.com/Engineer.Mostafa.Badr/',
-              tooltip: 'Facebook',
-              size: iconSize,
-            ),
-            _SocialIcon(
-              icon: FontAwesomeIcons.instagram,
-              color: const Color(0xFFE4405F),
-              url: 'https://www.instagram.com/engineer_mostafa_badr/',
-              tooltip: 'Instagram',
-              size: iconSize,
-            ),
-            _SocialIcon(
-              icon: FontAwesomeIcons.tiktok,
-              color: Colors.white,
-              url: 'https://www.tiktok.com/@engineer_mostafa_badr',
-              tooltip: 'TikTok',
-              size: iconSize,
-            ),
-            _SocialIcon(
-              icon: FontAwesomeIcons.youtube,
-              color: const Color(0xFFFF0000),
-              url: 'https://www.youtube.com/@Engineer_Mostafa_Badr',
-              tooltip: 'YouTube',
-              size: iconSize,
-            ),
-            _SocialIcon(
-              icon: FontAwesomeIcons.xTwitter,
-              color: Colors.white,
-              url: 'https://x.com/EngMostafa_Badr',
-              tooltip: 'X',
-              size: iconSize,
-            ),
+            for (final link in _socialLinks)
+              _SocialIcon(
+                icon: link.icon,
+                color: link.color,
+                url: link.url,
+                tooltip: link.name,
+                size: iconSize,
+              ),
             _SocialIcon(
               icon: FontAwesomeIcons.solidEnvelope,
-              color: const Color(0xFFFFA000),
-              url: _mailtoUrl(),
-              tooltip: 'Email',
+              color: AppColors.emailAmber,
+              url: emailLink(arabic: ar),
+              tooltip: Tr.k(context, 'contact.email'),
               size: iconSize,
             ),
           ],
         ),
         const SizedBox(height: 22),
-        // ─── Quick attribution row ───
         Wrap(
           alignment: WrapAlignment.center,
           spacing: 14,
-          runSpacing: 8,
+          runSpacing: AppSizes.sm,
           children: [
             _FooterChip(
               icon: FontAwesomeIcons.flutter,
-              iconColor: const Color(0xFF42A5F5),
-              label: ar ? 'مبني بـ Flutter' : 'Built with Flutter',
-              url: 'https://flutter.dev',
+              iconColor: AppColors.flutterBlue,
+              label: Tr.k(context, 'footer.builtWith'),
+              url: AppLinks.flutterHome,
             ),
             _FooterChip(
               icon: FontAwesomeIcons.cloud,
-              iconColor: const Color(0xFFF6821F),
-              label: ar ? 'مستضاف على Cloudflare' : 'Hosted on Cloudflare',
-              url: 'https://cloudflare.com',
+              iconColor: AppColors.cloudflare,
+              label: Tr.k(context, 'footer.hostedOn'),
+              url: AppLinks.cloudflareHome,
             ),
             _FooterChip(
               icon: FontAwesomeIcons.github,
               iconColor: Colors.white,
-              label: ar ? 'الكود مفتوح' : 'View source',
-              url: 'https://github.com/Engineer-Mostafa-Badr/Mostafa-Badr-Portfolio',
+              label: Tr.k(context, 'footer.viewSource'),
+              url: AppLinks.repository,
             ),
             const _LighthouseBadge(),
           ],
         ),
       ],
     );
-  }
-
-  String _mailtoUrl() {
-    const email = 'mostafamostafabadrbadr@gmail.com';
-    final subject = Uri.encodeComponent('Hello Mostafa');
-    final body = Uri.encodeComponent(
-      'Hi Mostafa,\n\nI would like to get in touch with you regarding...',
-    );
-    return 'mailto:$email?subject=$subject&body=$body';
   }
 }
 
@@ -151,37 +148,45 @@ class _SocialIconState extends State<_SocialIcon> {
   Widget build(BuildContext context) {
     return Tooltip(
       message: widget.tooltip,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hovering = true),
-        onExit: (_) => setState(() => _hovering = false),
-        child: GestureDetector(
-          onTap: () => openUrl(widget.url),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeOut,
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: _hovering
-                  ? widget.color.withValues(alpha: 0.12)
-                  : Colors.white.withValues(alpha: 0.04),
-              border: Border.all(
+      child: Semantics(
+        button: true,
+        label: widget.tooltip,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) => setState(() => _hovering = true),
+          onExit: (_) => setState(() => _hovering = false),
+          child: GestureDetector(
+            onTap: () => openUrl(widget.url, context: context),
+            child: AnimatedContainer(
+              duration: AppDurations.quick,
+              curve: Curves.easeOut,
+              padding: const EdgeInsets.all(AppSizes.md - 2),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
                 color: _hovering
-                    ? widget.color.withValues(alpha: 0.45)
-                    : Colors.white.withValues(alpha: 0.08),
+                    ? widget.color.withValues(alpha: 0.12)
+                    : Colors.white.withValues(alpha: 0.04),
+                border: Border.all(
+                  color: _hovering
+                      ? widget.color.withValues(alpha: 0.45)
+                      : Colors.white.withValues(alpha: 0.08),
+                ),
+                boxShadow: _hovering
+                    ? [
+                        BoxShadow(
+                          color: widget.color.withValues(alpha: 0.30),
+                          blurRadius: 14,
+                        ),
+                      ]
+                    : null,
               ),
-              boxShadow: _hovering
-                  ? [
-                      BoxShadow(
-                        color: widget.color.withValues(alpha: 0.30),
-                        blurRadius: 14,
-                      ),
-                    ]
-                  : null,
+              transform: Matrix4.translationValues(0, _hovering ? -2 : 0, 0),
+              child: FaIcon(
+                widget.icon,
+                color: widget.color,
+                size: widget.size,
+              ),
             ),
-            transform: Matrix4.translationValues(0, _hovering ? -2 : 0, 0),
-            child: FaIcon(widget.icon, color: widget.color, size: widget.size),
           ),
         ),
       ),
@@ -207,13 +212,16 @@ class _FooterChip extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: () => openUrl(url),
+        borderRadius: BorderRadius.circular(AppSizes.radiusPill),
+        onTap: () => openUrl(url, context: context),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.md,
+            vertical: 7,
+          ),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.03),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(AppSizes.radiusPill),
             border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
           ),
           child: Row(
@@ -221,12 +229,16 @@ class _FooterChip extends StatelessWidget {
             children: [
               FaIcon(icon, color: iconColor, size: 12),
               const SizedBox(width: 7),
-              Text(
-                label,
-                style: TextStyle(
-                  color: Colors.grey[400],
-                  fontWeight: FontWeight.w600,
-                  fontSize: 11.5,
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.grey[400],
+                    fontWeight: FontWeight.w600,
+                    fontSize: 11.5,
+                  ),
                 ),
               ),
             ],
@@ -237,46 +249,45 @@ class _FooterChip extends StatelessWidget {
   }
 }
 
-/// Lighthouse score badge — opens PageSpeed Insights for the site.
+/// Lighthouse score badge — opens PageSpeed Insights for the live site.
 class _LighthouseBadge extends StatelessWidget {
   const _LighthouseBadge();
 
   @override
   Widget build(BuildContext context) {
-    const targetUrl = 'https://pagespeed.web.dev/analysis?url='
-        'https%3A%2F%2Fmostafabadr.com%2F';
     return Tooltip(
-      message: isArabic(context)
-          ? 'افتح تقرير Lighthouse على PageSpeed Insights'
-          : 'Open Lighthouse report on PageSpeed Insights',
+      message: Tr.k(context, 'footer.lighthouse'),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: () => openUrl(targetUrl),
+          borderRadius: BorderRadius.circular(AppSizes.radiusPill),
+          onTap: () => openUrl(AppLinks.pageSpeedReport, context: context),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.md,
+              vertical: 7,
+            ),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(AppSizes.radiusPill),
               gradient: LinearGradient(
                 colors: [
-                  AppPalette.statusOnline.withValues(alpha: 0.18),
-                  AppPalette.statusOnline.withValues(alpha: 0.06),
+                  AppColors.success.withValues(alpha: 0.18),
+                  AppColors.success.withValues(alpha: 0.06),
                 ],
               ),
               border: Border.all(
-                color: AppPalette.statusOnline.withValues(alpha: 0.45),
+                color: AppColors.success.withValues(alpha: 0.45),
               ),
             ),
-            child: Row(
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('🚀', style: TextStyle(fontSize: 12)),
-                const SizedBox(width: 6),
+                Text('🚀', style: TextStyle(fontSize: 12)),
+                SizedBox(width: AppSizes.xs + 2),
                 Text(
                   'Lighthouse 95+',
                   style: TextStyle(
-                    color: AppPalette.statusOnline,
+                    color: AppColors.success,
                     fontWeight: FontWeight.w800,
                     fontSize: 11,
                     letterSpacing: 0.3,

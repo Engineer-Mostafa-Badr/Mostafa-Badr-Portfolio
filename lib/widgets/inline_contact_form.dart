@@ -1,31 +1,27 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:http/http.dart' as http;
+import 'package:mostafa_badr_portfolio/core/constants/app_colors.dart';
+import 'package:mostafa_badr_portfolio/core/constants/app_links.dart';
+import 'package:mostafa_badr_portfolio/core/constants/app_sizes.dart';
+import 'package:mostafa_badr_portfolio/core/errors/app_failure.dart';
+import 'package:mostafa_badr_portfolio/core/services/contact_service.dart';
+import 'package:mostafa_badr_portfolio/core/utils/responsive.dart';
+import 'package:mostafa_badr_portfolio/core/utils/url_launcher_service.dart';
 import 'package:mostafa_badr_portfolio/utils/app_locale.dart';
-import 'package:mostafa_badr_portfolio/utils/app_theme.dart';
+import 'package:mostafa_badr_portfolio/utils/contact_links.dart';
+import 'package:mostafa_badr_portfolio/widgets/common/app_button.dart';
 
-/// Inline contact form that submits to Formspree.
+/// Inline contact form.
 ///
-/// Configure your Formspree endpoint by editing [_formspreeEndpoint].
-/// Steps:
-///   1. Go to https://formspree.io and sign up (free tier: 50 submissions/month).
-///   2. Create a new form — set the email destination.
-///   3. Copy the form endpoint URL (looks like https://formspree.io/f/xyzabcd).
-///   4. Replace the [_formspreeEndpoint] constant below.
-///
-/// The form gracefully handles loading, success, and error states.
+/// Every outcome of the submission is represented on screen: sending, sent, or
+/// a specific failure with a specific next step. When the failure means the
+/// form itself cannot deliver — misconfigured endpoint, server down, rate
+/// limit — the error panel also offers WhatsApp, so the visitor is never left
+/// at a dead end holding a message they wanted to send.
 class InlineContactForm extends StatefulWidget {
   const InlineContactForm({super.key});
-
-  /// Formspree endpoint — receives submissions for engineermostafabadr@gmail.
-  static const String _formspreeEndpoint =
-      'https://formspree.io/f/xnjrrlqw';
-
-  static bool get _isConfigured =>
-      !_formspreeEndpoint.contains('YOUR_FORM_ID');
 
   @override
   State<InlineContactForm> createState() => _InlineContactFormState();
@@ -38,112 +34,102 @@ class _InlineContactFormState extends State<InlineContactForm> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _messageController = TextEditingController();
+  final _contactService = ContactService();
 
   _FormStatus _status = _FormStatus.idle;
-  String? _errorMessage;
+  AppFailure? _failure;
+  Timer? _resetTimer;
 
   @override
   void dispose() {
+    _resetTimer?.cancel();
     _nameController.dispose();
     _emailController.dispose();
     _messageController.dispose();
+    _contactService.dispose();
     super.dispose();
   }
 
-  String? _validateRequired(String? value, String fieldLabel) {
+  String? _validateRequired(String? value, String fieldKey) {
     if (value == null || value.trim().isEmpty) {
-      return isArabic(context)
-          ? '$fieldLabel مطلوب'
-          : '$fieldLabel is required';
+      return Tr.k(context, 'form.required')
+          .withArgs({'field': Tr.k(context, fieldKey)});
     }
     return null;
   }
 
   String? _validateEmail(String? value) {
-    final ar = isArabic(context);
     if (value == null || value.trim().isEmpty) {
-      return ar ? 'الإيميل مطلوب' : 'Email is required';
+      return Tr.k(context, 'form.required')
+          .withArgs({'field': Tr.k(context, 'form.emailField')});
     }
-    final emailRegex = RegExp(r'^[\w.\-]+@[\w\-]+\.[\w.\-]+$');
+    final emailRegex = RegExp(r'^[\w.\-+]+@[\w\-]+\.[\w.\-]+$');
     if (!emailRegex.hasMatch(value.trim())) {
-      return ar ? 'إيميل غير صالح' : 'Invalid email';
+      return Tr.k(context, 'form.invalidEmail');
     }
     return null;
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    if (!InlineContactForm._isConfigured) {
-      setState(() {
-        _status = _FormStatus.error;
-        _errorMessage = isArabic(context)
-            ? 'الـ form مش متظبط — حدّث Formspree endpoint في الكود'
-            : 'Form not configured — set Formspree endpoint in code';
-      });
-      return;
-    }
+    if (!(_formKey.currentState?.validate() ?? false)) return;
 
     setState(() {
       _status = _FormStatus.sending;
-      _errorMessage = null;
+      _failure = null;
     });
 
-    try {
-      final response = await http.post(
-        Uri.parse(InlineContactForm._formspreeEndpoint),
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'name': _nameController.text.trim(),
-          'email': _emailController.text.trim(),
-          'message': _messageController.text.trim(),
-          '_replyto': _emailController.text.trim(),
-          '_subject':
-              'Portfolio contact from ${_nameController.text.trim()}',
-        }),
-      );
+    final result = await _contactService.send(
+      name: _nameController.text.trim(),
+      email: _emailController.text.trim(),
+      message: _messageController.text.trim(),
+    );
 
-      if (!mounted) return;
+    if (!mounted) return;
 
-      if (response.statusCode >= 200 && response.statusCode < 300) {
+    switch (result) {
+      case ContactSuccess():
         setState(() => _status = _FormStatus.success);
         _nameController.clear();
         _emailController.clear();
         _messageController.clear();
-        // Auto-reset after 6 seconds so the user can send another message
-        Timer(const Duration(seconds: 6), () {
+        // Return to the form after a beat so a second message is possible
+        // without a page reload.
+        _resetTimer?.cancel();
+        _resetTimer = Timer(AppDurations.formSuccessReset, () {
           if (mounted) setState(() => _status = _FormStatus.idle);
         });
-      } else {
+      case ContactFailed(:final failure):
         setState(() {
           _status = _FormStatus.error;
-          _errorMessage = isArabic(context)
-              ? 'فشل الإرسال — حاول تاني أو استخدم الواتساب'
-              : 'Submission failed — please try WhatsApp instead';
+          _failure = failure;
         });
-      }
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _status = _FormStatus.error;
-        _errorMessage = isArabic(context)
-            ? 'مشكلة في الشبكة — حاول تاني'
-            : 'Network error — please try again';
-      });
     }
+  }
+
+  /// Hands the visitor's typed message straight to WhatsApp so a failed
+  /// submission does not mean retyping it.
+  void _sendViaWhatsApp() {
+    final message = _messageController.text.trim();
+    final name = _nameController.text.trim();
+    final fallback = message.isEmpty
+        ? scheduleCallLink(arabic: isArabic(context))
+        : _whatsappWithDraft(name: name, body: message);
+    openUrl(fallback, context: context);
+  }
+
+  String _whatsappWithDraft({required String name, required String body}) {
+    final greeting = isArabic(context) ? 'مرحباً مصطفى،' : 'Hi Mostafa,';
+    final signature = name.isEmpty ? '' : '\n\n— $name';
+    return AppLinks.whatsappWith('$greeting\n\n$body$signature');
   }
 
   @override
   Widget build(BuildContext context) {
-    final ar = isArabic(context);
-    final isMobile = MediaQuery.of(context).size.width < 700;
-
     if (_status == _FormStatus.success) {
-      return _SuccessState(arabic: ar);
+      return const _SuccessState();
     }
+
+    final isMobile = context.isMobile;
 
     return Form(
       key: _formKey,
@@ -151,151 +137,114 @@ class _InlineContactFormState extends State<InlineContactForm> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            ar
-                ? 'أو ابعتلي رسالة مباشرة'
-                : 'Or drop me a quick message',
+            Tr.k(context, 'form.prompt'),
             style: TextStyle(
               color: Colors.grey[300],
               fontSize: isMobile ? 14 : 15,
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 12),
-          // Name + Email row (stacked on mobile)
+          const SizedBox(height: AppSizes.md),
+          // Name and email share a row only where two fields still leave a
+          // usable input width.
           if (isMobile) ...[
-            _buildField(
-              controller: _nameController,
-              label: ar ? 'اسمك' : 'Your name',
-              icon: Icons.person_outline,
-              validator: (v) => _validateRequired(v, ar ? 'الاسم' : 'Name'),
-            ),
-            const SizedBox(height: 10),
-            _buildField(
-              controller: _emailController,
-              label: ar ? 'الإيميل' : 'Your email',
-              icon: Icons.mail_outline,
-              keyboardType: TextInputType.emailAddress,
-              validator: _validateEmail,
-            ),
-          ] else ...[
+            _nameField(),
+            const SizedBox(height: AppSizes.md - 2),
+            _emailField(),
+          ] else
             Row(
               children: [
-                Expanded(
-                  child: _buildField(
-                    controller: _nameController,
-                    label: ar ? 'اسمك' : 'Your name',
-                    icon: Icons.person_outline,
-                    validator: (v) =>
-                        _validateRequired(v, ar ? 'الاسم' : 'Name'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildField(
-                    controller: _emailController,
-                    label: ar ? 'الإيميل' : 'Your email',
-                    icon: Icons.mail_outline,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: _validateEmail,
-                  ),
-                ),
+                Expanded(child: _nameField()),
+                const SizedBox(width: AppSizes.md),
+                Expanded(child: _emailField()),
               ],
             ),
-          ],
-          const SizedBox(height: 10),
-          _buildField(
+          const SizedBox(height: AppSizes.md - 2),
+          _FormField(
             controller: _messageController,
-            label: ar ? 'الرسالة' : 'Your message',
+            label: Tr.k(context, 'form.message'),
             icon: Icons.chat_outlined,
             maxLines: 4,
-            validator: (v) =>
-                _validateRequired(v, ar ? 'الرسالة' : 'Message'),
+            validator: (v) => _validateRequired(v, 'form.messageField'),
           ),
           const SizedBox(height: 14),
-          if (_status == _FormStatus.error && _errorMessage != null) ...[
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-              decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.red.withValues(alpha: 0.35)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.error_outline,
-                      color: Colors.redAccent, size: 16),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _errorMessage!,
-                      style: const TextStyle(
-                        color: Colors.redAccent,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+          if (_status == _FormStatus.error && _failure != null) ...[
+            _ErrorPanel(
+              failure: _failure!,
+              onUseWhatsApp: _sendViaWhatsApp,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSizes.md),
           ],
-          SizedBox(
-            width: isMobile ? double.infinity : null,
-            child: ElevatedButton.icon(
-              onPressed: _status == _FormStatus.sending ? null : _submit,
-              icon: _status == _FormStatus.sending
-                  ? const SizedBox(
-                      width: 14,
-                      height: 14,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.black,
-                      ),
-                    )
-                  : const Icon(Icons.send_rounded, size: 16),
-              label: Text(
-                _status == _FormStatus.sending
-                    ? (ar ? 'جاري الإرسال…' : 'Sending…')
-                    : (ar ? 'إرسال الرسالة' : 'Send message'),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFD700),
-                foregroundColor: Colors.black,
-                disabledBackgroundColor:
-                    const Color(0xFFFFD700).withValues(alpha: 0.4),
-                disabledForegroundColor: Colors.black.withValues(alpha: 0.6),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 22,
-                  vertical: 14,
-                ),
-                textStyle: const TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 14,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+          AppButton(
+            label: Tr.k(
+              context,
+              _status == _FormStatus.sending ? 'form.sending' : 'form.send',
             ),
+            icon: Icons.send_rounded,
+            busy: _status == _FormStatus.sending,
+            expand: isMobile,
+            onPressed: _submit,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    String? Function(String?)? validator,
-    int maxLines = 1,
-    TextInputType? keyboardType,
-  }) {
+  Widget _nameField() => _FormField(
+        controller: _nameController,
+        label: Tr.k(context, 'form.name'),
+        icon: Icons.person_outline,
+        textInputAction: TextInputAction.next,
+        validator: (v) => _validateRequired(v, 'form.nameField'),
+      );
+
+  Widget _emailField() => _FormField(
+        controller: _emailController,
+        label: Tr.k(context, 'form.email'),
+        icon: Icons.mail_outline,
+        keyboardType: TextInputType.emailAddress,
+        textInputAction: TextInputAction.next,
+        validator: _validateEmail,
+      );
+}
+
+class _FormField extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final IconData icon;
+  final String? Function(String?)? validator;
+  final int maxLines;
+  final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+
+  const _FormField({
+    required this.controller,
+    required this.label,
+    required this.icon,
+    this.validator,
+    this.maxLines = 1,
+    this.keyboardType,
+    this.textInputAction,
+  });
+
+  OutlineInputBorder _border(Color color, {double width = 1}) =>
+      OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+        borderSide: BorderSide(color: color, width: width),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final idle = Colors.white.withValues(alpha: 0.10);
+
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
       keyboardType: keyboardType,
+      textInputAction: textInputAction,
+      // Validate as the visitor corrects a flagged field, so the error clears
+      // the moment it is fixed rather than on the next submit.
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       style: const TextStyle(color: Colors.white, fontSize: 14),
       validator: validator,
       decoration: InputDecoration(
@@ -310,68 +259,138 @@ class _InlineContactFormState extends State<InlineContactForm> {
         fillColor: Colors.white.withValues(alpha: 0.04),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
-          vertical: 12,
+          vertical: AppSizes.md,
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.10)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.10)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide:
-              const BorderSide(color: AppPalette.accentCyan, width: 1.4),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.red.withValues(alpha: 0.6)),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.redAccent, width: 1.4),
-        ),
-        errorStyle: const TextStyle(fontSize: 11, height: 1.2),
+        border: _border(idle),
+        enabledBorder: _border(idle),
+        focusedBorder: _border(AppColors.cyan, width: 1.4),
+        errorBorder: _border(AppColors.danger.withValues(alpha: 0.6)),
+        focusedErrorBorder: _border(AppColors.danger, width: 1.4),
+        errorStyle: const TextStyle(fontSize: 11, height: 1.35),
+        errorMaxLines: 3,
       ),
     );
   }
 }
 
-class _SuccessState extends StatelessWidget {
-  final bool arabic;
-  const _SuccessState({required this.arabic});
+/// Failure panel: what went wrong, what to do about it, and — when the form
+/// itself is the broken part — a one-tap route that still works.
+class _ErrorPanel extends StatelessWidget {
+  final AppFailure failure;
+  final VoidCallback onUseWhatsApp;
+
+  const _ErrorPanel({required this.failure, required this.onUseWhatsApp});
+
+  /// Failures where retrying the form is unlikely to help soon, so WhatsApp is
+  /// offered as the real way forward rather than a consolation.
+  bool get _offersFallback => const {
+        FailureKind.endpointUnavailable,
+        FailureKind.serverError,
+        FailureKind.rateLimited,
+        FailureKind.offline,
+        FailureKind.timeout,
+        FailureKind.unexpectedResponse,
+        FailureKind.unknown,
+      }.contains(failure.kind);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.danger.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(AppSizes.radiusLg),
+        border: Border.all(color: AppColors.danger.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.error_outline_rounded,
+                color: AppColors.danger,
+                size: 18,
+              ),
+              const SizedBox(width: AppSizes.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      failure.title(context),
+                      style: const TextStyle(
+                        color: AppColors.danger,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: AppSizes.xs),
+                    Text(
+                      failure.action(context),
+                      style: TextStyle(
+                        color: Colors.grey[300],
+                        fontSize: 12.5,
+                        height: 1.5,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (_offersFallback) ...[
+            const SizedBox(height: AppSizes.md),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: AppButton(
+                label: Tr.k(context, 'form.fallbackWhatsapp'),
+                icon: Icons.chat_bubble_outline_rounded,
+                size: AppButtonSize.small,
+                variant: AppButtonVariant.accent,
+                onPressed: onUseWhatsApp,
+              ),
+            ),
+          ],
+        ],
+      ),
+    ).animate().fadeIn(duration: 250.ms).slideY(begin: -0.1, end: 0);
+  }
+}
+
+class _SuccessState extends StatelessWidget {
+  const _SuccessState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.xl),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFF34D399).withValues(alpha: 0.18),
-            const Color(0xFF10B981).withValues(alpha: 0.08),
+            AppColors.success.withValues(alpha: 0.18),
+            AppColors.successDeep.withValues(alpha: 0.08),
           ],
         ),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: const Color(0xFF34D399).withValues(alpha: 0.45),
-        ),
+        border: Border.all(color: AppColors.success.withValues(alpha: 0.45)),
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(AppSizes.md - 2),
             decoration: BoxDecoration(
-              color: const Color(0xFF34D399).withValues(alpha: 0.20),
+              color: AppColors.success.withValues(alpha: 0.20),
               shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.check_circle_outline_rounded,
-              color: Color(0xFF34D399),
+              color: AppColors.success,
               size: 22,
             ),
           ),
@@ -382,18 +401,16 @@ class _SuccessState extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  arabic ? 'تمام، وصلتني رسالتك!' : 'Got it — message received!',
+                  Tr.k(context, 'form.successTitle'),
                   style: const TextStyle(
-                    color: Color(0xFF34D399),
+                    color: AppColors.success,
                     fontWeight: FontWeight.w800,
                     fontSize: 15,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSizes.xs),
                 Text(
-                  arabic
-                      ? 'هرد عليك في أقل من 24 ساعة.'
-                      : "I'll get back to you in under 24 hours.",
+                  Tr.k(context, 'form.successBody'),
                   style: TextStyle(
                     color: Colors.grey[300],
                     fontSize: 12.5,
